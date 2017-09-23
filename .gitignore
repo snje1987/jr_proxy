@@ -1,0 +1,10 @@
+/nbproject/private
+/compiled/
+/vendor/
+/composer.lock
+*.swp
+/.well-known/
+/www/lib/
+/.htaccess
+/web.config
+/www/theme/
