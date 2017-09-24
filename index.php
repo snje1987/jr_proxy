@@ -28,6 +28,23 @@ if ($verbose) {
 error_reporting(E_ALL);
 set_time_limit(0);
 ob_implicit_flush();
+declare(ticks = 1);
+
+pcntl_signal(SIGTERM, 'sig_handler');
+pcntl_signal(SIGINT, 'sig_handler');
+pcntl_signal(SIGCHLD, 'sig_handler');
+
+function sig_handler($sig) {
+    switch ($sig) {
+        case SIGTERM:
+        case SIGINT:
+            exit();
+            break;
+        case SIGCHLD:
+            pcntl_waitpid(-1, $status);
+            break;
+    }
+}
 
 function microtime_float() {
     list($usec, $sec) = explode(' ', microtime());
@@ -117,6 +134,7 @@ function handle_client($ssock, $csock) {
 
 function interact($client) {
     mark_time();
+    $socket = false;
     while (($info = read_http($client)) !== '') {
         log_slow("读取请求: [{time}]\n");
         if (DEBUG) {
@@ -161,8 +179,10 @@ function interact($client) {
             return false;
         }
         echo "{$url} [{$data['code']},{$len}]\n";
-        socket_close($socket);
         break;
+    }
+    if ($socket !== false) {
+        socket_close($socket);
     }
 }
 
@@ -185,13 +205,7 @@ function read_http($socket) {
         }
         if ($bytes <= 0) {//没有数据则暂停100毫秒
             if ($retry ++ >= 50) {
-                echo "[ERROR] 读取超时";
-                if ($info === null) {
-                    echo $data;
-                } else {
-                    print_r($info);
-                }
-                echo "\n";
+                echo "[ERROR] 读取超时\n";
                 return false;
             }
             usleep(100000);
@@ -260,6 +274,7 @@ function analysis_header($data) {
 
     $info = explode(' ', $line);
     if (count($info) < 3) {
+        echo '[错误请求] ' . $line . "\n";
         return false;
     }
 
@@ -310,6 +325,7 @@ function analysis_header($data) {
             }
             return $ret;
         } else {
+            echo '[暂不支持] ' . $line . "\n";
             return false;
         }
     }
