@@ -133,9 +133,10 @@ function handle_client($ssock, $csock) {
 }
 
 function interact($client) {
+    echo "新连接\n";
     mark_time();
     $socket = false;
-    while (($info = read_http($client)) !== '') {
+    while (($info = read_http($client)) !== false) {
         log_slow("读取请求: [{time}]\n");
         if (DEBUG) {
             print_r($info);
@@ -143,55 +144,114 @@ function interact($client) {
         if (!is_array($info) || $info['type'] !== 'request') {
             break;
         }
-        $url = "[{$info['method']}] {$info['protical']}://{$info['host']}:{$info['port']}{$info['url']}";
-
-        $socket = connect_host($info);
-        log_slow("连接目标: [{time}] {$url}\n");
-        if ($socket === false) {
-            echo "[ERROR] 连接服务器失败：{$url}\n";
-            break;
+        if ($info['method'] == 'CONNECT') {
+            parse_ssl($info, $client);
+        } else {
+            parse_plain($info, $client);
         }
-        $data = forward_request($socket, $info, $url);
-        if ($data === false || !is_array($data) || $data['type'] !== 'respond') {
-            break;
-        }
-        $len = strlen($data['body']);
-        $prefix = '/index/checkVer/';
-        $host = 'version.jr.moefantasy.com';
-        $find = '"cheatsCheck":0';
-        $replace = '"cheatsCheck":1';
-        if ($info['host'] == $host && strncmp($info['url'], $prefix, strlen($prefix)) === 0) {
-            if (strpos($data['body'], $find) !== false) {
-                $data['body'] = str_replace($find, $replace, $data['body']);
-                echo "替换checkVer成功\n";
-            }
-        }
-
-        $respond = $data['line'] . "\r\n" . $data['header'] . "\r\n\r\n" . $data['body'];
-        if (DEBUG) {
-            echo $respond;
-        }
-        $len = strlen($respond);
-        $ret = socket_write($client, $respond, $len);
-        log_slow("返回结果: [{time}] {$url}\n");
-        if ($ret === false) {
-            echo "[ERROR] 回送失败：{$url}\n";
-            return false;
-        }
-        echo "{$url} [{$data['code']},{$len}]\n";
-        break;
+        //break;
     }
+    echo "连接关闭\n";
     if ($socket !== false) {
         socket_close($socket);
     }
 }
 
-function read_http($socket) {
+function parse_ssl($info, $client) {
+
+    $url = "[{$info['method']}] {$info['host']}:{$info['port']}";
+
+    $socket = connect_host($info);
+    log_slow("连接目标: [{time}] {$url}\n");
+    if ($socket === false) {
+        echo "[ERROR] 连接服务器失败：{$url}\n";
+        return;
+    }
+    $succeed = "HTTP/1.1 200 Connection Established\r\n\r\n";
+    socket_write($client, $succeed, strlen($succeed));
+    $buf = null;
+    while (true) {
+        $bytes = socket_recv($client, $buf, 2048, MSG_DONTWAIT);
+        if ($bytes === false) {
+            $err = socket_last_error($client);
+            if ($err != SOCKET_EAGAIN) {
+                break;
+            }
+            socket_clear_error($client);
+        } elseif ($bytes === 0) {
+            break;
+        } elseif ($bytes > 0) {
+            $ret = socket_write($socket, $buf, $bytes);
+            if ($ret !== $bytes) {
+                break;
+            }
+        }
+        $bytes = socket_recv($socket, $buf, 2048, MSG_DONTWAIT);
+        if ($bytes === false) {
+            $err = socket_last_error($socket);
+            if ($err != SOCKET_EAGAIN) {
+                break;
+            }
+            socket_clear_error($socket);
+        } elseif ($bytes === 0) {
+            break;
+        } elseif ($bytes > 0) {
+            $ret = socket_write($client, $buf, $bytes);
+            if ($ret !== $bytes) {
+                break;
+            }
+        }
+        usleep(10000);
+    }
+    echo "{$url}\n";
+    socket_close($socket);
+}
+
+function parse_plain($info, $client) {
+    $url = "[{$info['method']}] {$info['protical']}://{$info['host']}:{$info['port']}{$info['url']}";
+
+    $socket = connect_host($info);
+    log_slow("连接目标: [{time}] {$url}\n");
+    if ($socket === false) {
+        echo "[ERROR] 连接服务器失败：{$url}\n";
+        return;
+    }
+    $data = forward_request($socket, $info, $url);
+    if ($data === false || !is_array($data) || $data['type'] !== 'respond') {
+        return;
+    }
+    $len = strlen($data['body']);
+    $prefix = '/index/checkVer/';
+    $host = 'version.jr.moefantasy.com';
+    $find = '"cheatsCheck":0';
+    $replace = '"cheatsCheck":1';
+    if ($info['host'] == $host && strncmp($info['url'], $prefix, strlen($prefix)) === 0) {
+        if (strpos($data['body'], $find) !== false) {
+            $data['body'] = str_replace($find, $replace, $data['body']);
+            echo "替换checkVer成功\n";
+        }
+    }
+
+    $respond = $data['line'] . "\r\n" . $data['header'] . "\r\n\r\n" . $data['body'];
+    if (DEBUG) {
+        echo $respond;
+    }
+    $len = strlen($respond);
+    $ret = socket_write($client, $respond, $len);
+    log_slow("返回结果: [{time}] {$url}\n");
+    if ($ret === false) {
+        echo "[ERROR] 回送失败：{$url}\n";
+        return;
+    }
+    echo "{$url} [{$data['code']},{$len}]\n";
+}
+
+function read_http($socket, $check = false) {
     $buf = null;
     $data = '';
     $info = null;
-    $retry = 0;
     $start = 0;
+    $retry = 0;
     while (true) {
         $bytes = socket_recv($socket, $buf, 2048, MSG_DONTWAIT);
         if ($bytes === false) {
@@ -201,36 +261,34 @@ function read_http($socket) {
                 return false;
             }
             socket_clear_error($socket);
-            $bytes = 0;
-        }
-        if ($bytes <= 0) {//没有数据则暂停100毫秒
-            if ($retry ++ >= 50) {
-                echo "[ERROR] 读取超时\n";
+            $retry ++;
+            if ($retry > 500) {
                 return false;
             }
-            usleep(100000);
-        } else {
-            if ($info === null) {//还没有分析头部
-                $data .= $buf;
-                if (($pos = strpos($data, "\r\n\r\n")) !== false) {//请求头接收完毕
-                    $info = analysis_header($data);
-                    if ($info === false) {
-                        return false;
-                    }
+            usleep(10000);
+        } elseif ($bytes === 0) {//连接已关闭
+            return false;
+        }
+        if ($info === null) {//还没有分析头部
+            $data .= $buf;
+            if (($pos = strpos($data, "\r\n\r\n")) !== false) {//请求头接收完毕
+                $info = analysis_header($data);
+                if ($info === false) {
+                    return false;
                 }
-            } else {//已经分析头部
-                $info['body'] .= $buf;
             }
-            if ($info !== null) {
-                if ($info['length'] >= 0) {
-                    if (strlen($info['body']) >= $info['length']) {
-                        return $info;
-                    }
-                } elseif ($info['length'] == -2) {//chunked
-                    $start = analysis_chunk($info['body'], $start);
-                    if ($start === -1) {
-                        return $info;
-                    }
+        } else {//已经分析头部
+            $info['body'] .= $buf;
+        }
+        if ($info !== null) {
+            if ($info['length'] >= 0) {
+                if (strlen($info['body']) >= $info['length']) {
+                    return $info;
+                }
+            } elseif ($info['length'] == -2) {//chunked
+                $start = analysis_chunk($info['body'], $start);
+                if ($start === -1) {
+                    return $info;
                 }
             }
         }
@@ -322,6 +380,21 @@ function analysis_header($data) {
             $ret['http'] = $info[2];
             if (stripos($ret['header'], "Connection: Keep-alive\r\n") !== false) {
                 str_replace("Connection: Keep-alive\r\n", "Connection: Close\r\n", $ret['header']);
+            }
+            return $ret;
+        } elseif ($info[0] === 'CONNECT') {
+            $url = $info[1];
+            $matches = array();
+            if (!preg_match('/^([a-z0-9-_.]+)(:(\d+))?(\S*)$/', $url, $matches)) {
+                return false;
+            }
+            $ret['method'] = $info[0];
+            $ret['host'] = $matches[1];
+            $ret['length'] = 0;
+            if ($matches[3] !== '') {
+                $ret['port'] = $matches[3];
+            } else {
+                $ret['port'] = 443;
             }
             return $ret;
         } else {
