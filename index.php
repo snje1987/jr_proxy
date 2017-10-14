@@ -385,7 +385,7 @@ function analysis_header($data) {
         } elseif ($info[0] === 'CONNECT') {
             $url = $info[1];
             $matches = array();
-            if (!preg_match('/^([a-z0-9-_.]+)(:(\d+))?(\S*)$/', $url, $matches)) {
+            if (!preg_match('/^([a-z0-9-_.]+)(:(\d+))?$/', $url, $matches)) {
                 return false;
             }
             $ret['method'] = $info[0];
