@@ -1,6 +1,6 @@
 <?php
 
-namespace Site;
+namespace App;
 
 use Workerman\Worker;
 

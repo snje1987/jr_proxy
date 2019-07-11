@@ -1,16 +1,13 @@
+#!/usr/bin/env php
 <?php
 
 namespace App;
 
-use Workerman\Worker;
+set_time_limit(0);
 
 $root = dirname(__DIR__);
 require_once $root . '/vendor/autoload.php';
 
 Config::load();
 
-$http_server = new Server\WebServer();
-
-if (!defined('IN_ALL')) {
-    Worker::runAll();
-}
+Command\BaseCommand::run_command($argv);
