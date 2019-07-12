@@ -2,10 +2,18 @@
 
 namespace App\Controler;
 
+use Workerman\Protocols\Http;
+
 abstract class BaseControler {
 
     public static $default_function = 'index';
+
+    /**
+     *
+     * @var \App\Router
+     */
     protected $router;
+    protected $tpl_path;
 
     public function __construct($router) {
         $this->router = $router;
@@ -26,6 +34,25 @@ abstract class BaseControler {
 
     public function send($msg) {
         $this->router->send($msg);
+    }
+
+    protected function display_tpl($tpl, $vars) {
+        $this->tpl_path = APP_ROOT . '/src/theme/' . $tpl . '.php';
+        if (!file_exists($this->tpl_path)) {
+            return $this->router->show_404();
+        }
+
+        extract($vars, EXTR_OVERWRITE);
+
+        ob_start();
+
+        require $this->tpl_path;
+
+        $result = ob_get_clean();
+
+        Http::header('Content-type:text/html; charset=utf-8');
+
+        $this->send($result);
     }
 
 }

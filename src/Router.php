@@ -15,12 +15,12 @@ class Router {
         if ($pos !== false) {
             $uri = substr($uri, 0, $pos);
         }
-        if (!preg_match('/([a-z0-9_]*)(\/([a-z0-9_]*))?/', $uri, $matches)) {
+        if (!preg_match('/^(\/([a-z0-9_]*))?(\/([a-z0-9_]*)).*$/', $uri, $matches)) {
             return $this->show_404();
         }
 
-        $class_name = isset($matches[1]) ? strval($matches[1]) : '';
-        $function_name = isset($matches[3]) ? strval($matches[3]) : '';
+        $class_name = isset($matches[2]) ? strval($matches[2]) : '';
+        $function_name = isset($matches[4]) ? strval($matches[4]) : '';
 
         if ($class_name == '') {
             $class_name = 'Base';

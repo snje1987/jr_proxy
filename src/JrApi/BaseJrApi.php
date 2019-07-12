@@ -33,7 +33,7 @@ class BaseJrApi {
 
         $class_name = ucfirst($api[0]);
         if (isset($api[1])) {
-            $class_name .= '\\' . $api[1];
+            $class_name .= '\\' . ucfirst($api[1]);
         }
 
         $full_name = __NAMESPACE__ . '\\' . $class_name;

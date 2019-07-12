@@ -1,0 +1,46 @@
+.navbar-default,.navbar-brand{
+    font-size:14px;
+}
+.richtext{
+    width:100%;
+    min-height:400px;
+}
+.textarea{
+    width:100%;
+    min-height:300px;
+    resize:none;
+}
+textarea.code{
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+    font-size:12px;
+}
+img{
+    background-color:#E0E0E0;
+}
+
+.tooltip-inner{
+    background-color:#E0E0E0;
+    opacity: 1;
+    max-width:none;
+}
+.tooltip-inner img{
+    max-width:300px;
+    max-height:300px;
+}
+.bootstrap-select{
+    max-width:100%;
+}
+.avatar_box{
+    height:400px;
+}
+.avatar_box img{
+    max-width:100%;
+}
+th{
+    vertical-align:middle !important;
+}
+
+td{
+    vertical-align:middle !important;
+}
+
