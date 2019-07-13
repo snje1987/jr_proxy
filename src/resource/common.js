@@ -120,13 +120,13 @@
                     exceed_point[j] = result.exceed_point[point_attr[j]];
 
                     if (exceed_point[j] > 0) {
-                        sum_point[j] += '(<span style="color:red;">+' + exceed_point[j] + '</span>)';
+                        sum_point[j] += '<sup style="color:red;">+' + exceed_point[j] + '</sup>';
                     }
                     else if (exceed_point[j] == 0) {
-                        sum_point[j] += '(<span style="color:green;">' + exceed_point[j] + '</span>)';
+                        sum_point[j] += '<sup style="color:green;">' + exceed_point[j] + '</sup>';
                     }
                     else {
-                        sum_point[j] += '(<span style="color:blue;">' + exceed_point[j] + '</span>)';
+                        sum_point[j] += '<sup style="color:blue;">' + exceed_point[j] + '</sup>';
                     }
 
                 }
