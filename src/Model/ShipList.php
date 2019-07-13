@@ -57,4 +57,100 @@ class ShipList {
         $this->save_list();
     }
 
+    public function get_target($id) {
+        if (!isset($this->list[$id])) {
+            return null;
+        }
+
+        $ship = $this->list[$id];
+        if ($ship['isLocked'] != 1) {
+            return null;
+        }
+
+        $ship_card = new ShipCard();
+
+        $card = $ship_card->get_ship($ship['shipCid']);
+        if ($card === null) {
+            return null;
+        }
+
+        $cur_strengthen = $ship['strengthenAttribute'];
+        $full_strengthen = $card['strengthenTop'];
+
+        foreach ($cur_strengthen as $k1 => $v1) {
+            if ($v1 < $full_strengthen[$k1]) {
+                $ship['strengthenTop'] = $full_strengthen;
+                return $ship;
+            }
+        }
+
+        return null;
+    }
+
+    public function get_target_list() {
+
+        $ship_card = new ShipCard();
+
+        $list = [];
+
+        foreach ($this->list as $id => $v) {
+            if ($v['isLocked'] == 1) {
+                $card = $ship_card->get_ship($v['shipCid']);
+                if ($card !== null) {
+                    $cur_strengthen = $v['strengthenAttribute'];
+                    $full_strengthen = $card['strengthenTop'];
+
+                    foreach ($cur_strengthen as $k1 => $v1) {
+                        if ($v1 < $full_strengthen[$k1]) {
+                            $v['strengthenTop'] = $full_strengthen;
+                            $list[$id] = $v;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        ksort($list);
+
+        return $list;
+    }
+
+    public function get_material($cid = null) {
+        $ship_card = new ShipCard();
+
+        $list = [];
+
+        foreach ($this->list as $id => $v) {
+            if ($v['isLocked'] == 0) {
+                if (!isset($list[$v['shipCid']])) {
+
+                    if (is_array($cid) && !in_array($v['shipCid'], $cid)) {
+                        continue;
+                    }
+
+                    $card = $ship_card->get_ship($v['shipCid']);
+
+                    if ($card === null) {
+                        continue;
+                    }
+
+                    $list[$v['shipCid']] = [
+                        'count' => 1,
+                        'title' => $v['title'],
+                        'strengthenSupplyExp' => $card['strengthenSupplyExp'],
+                        'dismantle' => $card['dismantle'],
+                    ];
+                }
+                else {
+                    $list[$v['shipCid']]['count'] ++;
+                }
+            }
+        }
+
+        ksort($list);
+
+        return $list;
+    }
+
 }

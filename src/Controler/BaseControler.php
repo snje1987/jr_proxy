@@ -36,7 +36,7 @@ abstract class BaseControler {
         $this->router->send($msg);
     }
 
-    protected function display_tpl($tpl, $vars) {
+    protected function display_tpl($tpl, $vars, $content_type = 'text/html; charset=utf-8') {
         $this->tpl_path = APP_ROOT . '/src/theme/' . $tpl . '.php';
         if (!file_exists($this->tpl_path)) {
             return $this->router->show_404();
@@ -50,7 +50,9 @@ abstract class BaseControler {
 
         $result = ob_get_clean();
 
-        Http::header('Content-type:text/html; charset=utf-8');
+        if ($content_type !== null) {
+            Http::header('Content-type: ' . $content_type);
+        }
 
         $this->send($result);
     }
