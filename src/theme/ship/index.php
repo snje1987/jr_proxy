@@ -16,10 +16,10 @@
                         <tr>
                             <td width="50" class="text-center">选择</td>
                             <td class="text-center">名称</td>
-                            <td class="text-center">火力</td>
-                            <td class="text-center">鱼雷</td>
-                            <td class="text-center">装甲</td>
-                            <td class="text-center">对空</td>
+                            <td class="text-center">火力(x<?= $points[0] ?>)</td>
+                            <td class="text-center">鱼雷(x<?= $points[1] ?>)</td>
+                            <td class="text-center">装甲(x<?= $points[2] ?>)</td>
+                            <td class="text-center">对空(x<?= $points[3] ?>)</td>
                         </tr>
                         <?php foreach ($target as $id => $v) { ?>
                             <tr>

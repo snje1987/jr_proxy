@@ -8,6 +8,7 @@ class Calculator {
     const VALUES_ATTRS = ['2', '3', '4', '9'];
 
     protected $values = [];
+    protected $points = [];
     protected $left_point;
     protected $used_ship;
     protected $material;
@@ -17,6 +18,14 @@ class Calculator {
         $values = \App\Config::get('main', 'values', []);
         for ($i = 0; $i < 4; $i++) {
             $this->values[$i] = isset($values[$i]) ? intval($values[$i]) : 1;
+            if ($this->values[$i] < 0) {
+                $this->values[$i] = 0;
+            }
+        }
+
+        $points = \App\Config::get('main', 'points', []);
+        for ($i = 0; $i < 4; $i++) {
+            $this->points[$i] = isset($points[$i]) ? intval($points[$i]) : 1;
         }
     }
 
@@ -36,12 +45,17 @@ class Calculator {
             foreach (self::VALUES_ATTRS as $i => $name) {
                 $material_value += $info['dismantle'][$name] * $this->values[$i];
             }
-            $material[$cid]['value'] = $material_value;
 
             $point_sum = 0;
-            foreach (self::POINTS_ATTRS as $k) {
+            $point_value = 0;
+            foreach (self::POINTS_ATTRS as $i => $k) {
                 $point_sum += $info['strengthenSupplyExp'][$k];
+                $point_value += $info['strengthenSupplyExp'][$k] * $this->points[$i];
             }
+
+            $material_value += $point_value;
+            $material[$cid]['value'] = $material_value;
+
             //这是素材的绝对口感值，最终会按照这个来剔除多余的素材
             $material[$cid]['score'] = $point_sum / $material_value;
         }
@@ -64,7 +78,7 @@ class Calculator {
             }
             $cid = $this->get_best(); //对素材评分，计算出性价比最高的
 
-            if ($cid === -1) {
+            if ($cid === null) {
                 break;
             }
 
@@ -75,11 +89,11 @@ class Calculator {
     }
 
     protected function get_best() {
-        $best_ship = -1;
-        $best_score = -1;
+        $best_ship = null;
+        $best_score = null;
         foreach ($this->material as $cid => $info) {
             $point_sum = 0;
-            foreach (self::POINTS_ATTRS as $k) {
+            foreach (self::POINTS_ATTRS as $i => $k) {
                 //计算素材能给当前目标提供的强化点数之和
                 if ($info['strengthenSupplyExp'][$k] <= $this->left_point[$k]) {
                     $point_sum += $info['strengthenSupplyExp'][$k];
@@ -90,7 +104,8 @@ class Calculator {
             }
             //这是素材的相对口感值，找出最高的来使用
             $score = $point_sum / $info['value'];
-            if ($score > 0 && $score > $best_score) {
+
+            if ($point_sum > 0 && ($best_score === null || $score > $best_score)) {
                 $best_score = $score;
                 $best_ship = $cid;
             }
@@ -140,10 +155,10 @@ class Calculator {
 
     protected function remove_exceed() {
         while (true) {
-            $best_cid = -1;
-            $best_score = -1;
+            $worst_cid = null;
+            $worst_cid_score = null;
 
-            //找出能移除的评分最高的船
+            //找出能移除的评分最低的船
             foreach ($this->used_ship as $cid => $info) {
                 $can_remove = true;
                 foreach (self::POINTS_ATTRS as $k) {
@@ -154,27 +169,27 @@ class Calculator {
                 }
 
                 if ($can_remove) {
-                    if ($info['score'] > $best_score) {
-                        $best_score = $info['score'];
-                        $best_cid = $cid;
+                    if ($worst_cid_score === null || $info['score'] < $worst_cid_score) {
+                        $worst_cid_score = $info['score'];
+                        $worst_cid = $cid;
                     }
                 }
             }
 
             //找不到就停止
-            if ($best_cid === -1) {
+            if ($worst_cid === null) {
                 break;
             }
 
             foreach (self::POINTS_ATTRS as $k) {
-                $this->left_point[$k] += $this->used_ship[$best_cid]['strengthenSupplyExp'][$k];
+                $this->left_point[$k] += $this->used_ship[$worst_cid]['strengthenSupplyExp'][$k];
             }
 
-            if ($this->used_ship[$best_cid]['count'] > 1) {
-                $this->used_ship[$best_cid]['count'] --;
+            if ($this->used_ship[$worst_cid]['count'] > 1) {
+                $this->used_ship[$worst_cid]['count'] --;
             }
             else {
-                unset($this->used_ship[$best_cid]);
+                unset($this->used_ship[$worst_cid]);
             }
         }
     }

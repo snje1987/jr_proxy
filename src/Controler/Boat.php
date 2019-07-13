@@ -21,11 +21,13 @@ class Boat extends BaseControler {
         $target = $ship_list->get_target_list();
 
         $values = \App\Config::get('main', 'values');
+        $points = \App\Config::get('main', 'points');
 
         $this->display_tpl('ship/index', [
             'material' => $material,
             'target' => $target,
             'values' => $values,
+            'points' => $points,
         ]);
     }
 
