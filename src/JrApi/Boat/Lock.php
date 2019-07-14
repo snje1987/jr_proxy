@@ -1,12 +1,12 @@
 <?php
 
-namespace App\JrApi\Dock;
+namespace App\JrApi\Boat;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
 use App\Model\ShipList;
 
-class Evolution extends BaseJrApi {
+class Lock extends BaseJrApi {
 
     public function __construct() {
         
@@ -31,13 +31,11 @@ class Evolution extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['shipVO']) || !isset($json['shipVO'][0])) {
+        if (!isset($json['shipVO'])) {
             return;
         }
 
-
-
-        $new_ship = $json['shipVO'][0];
+        $new_ship = $json['shipVO'];
 
         $id = $new_ship['id'];
         $ship = [
