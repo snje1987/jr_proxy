@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http;
+use Exception;
 
 class Response extends Base {
 

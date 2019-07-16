@@ -8,8 +8,8 @@ use App\Model\ShipList;
 
 class ConvertSkill extends BaseJrApi {
 
-    public function __construct() {
-        
+    public function __construct($request) {
+        parent::__construct($request);
     }
 
     /**
@@ -30,7 +30,7 @@ class ConvertSkill extends BaseJrApi {
         if ($json === null) {
             return;
         }
-        
+
         if (!isset($json['shipVO'])) {
             return;
         }

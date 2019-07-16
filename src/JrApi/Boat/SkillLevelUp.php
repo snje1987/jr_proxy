@@ -8,8 +8,8 @@ use App\Model\ShipList;
 
 class SkillLevelUp extends BaseJrApi {
 
-    public function __construct() {
-        
+    public function __construct($request) {
+        parent::__construct($request);
     }
 
     /**
@@ -30,7 +30,7 @@ class SkillLevelUp extends BaseJrApi {
         if ($json === null) {
             return;
         }
-        
+
         if (!isset($json['shipVO'])) {
             return;
         }

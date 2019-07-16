@@ -22,13 +22,40 @@ class BaseJrApi {
         self::$save_api_transmission = \App\Config::get('debug', 'save_api_transmission', 0);
     }
 
+    public static function get_api_name($http_data) {
+        $host = $http_data['host'];
+
+        if ($host === 'version.jr.moefantasy.com' || $host === 'version.channel.jr.moefantasy.com') {
+            return ['fhx'];
+        }
+
+        if (preg_match('/s[0-9]+\.jr\.moefantasy\.com/', $host)) {
+            $url = $http_data['url'];
+
+            if (preg_match('/^\/?(\w+)\/(\w+).*$/', $url, $matches)) {
+                $space_name = $matches[1];
+                $class_name = $matches[2];
+
+                return [$space_name, $class_name];
+            }
+        }
+        return null;
+    }
+
     /**
-     * 
+     * @param Http\Request $request
      * @return self
      */
-    public static function create($api) {
+    public static function create($request) {
+        $http_data = $request->get_http_data();
+
+        $api = self::get_api_name($http_data);
+        if ($api === null) {
+            return null;
+        }
+
         if (!isset($api[0])) {
-            return new self();
+            return new self($request);
         }
 
         $class_name = ucfirst($api[0]);
@@ -38,13 +65,13 @@ class BaseJrApi {
 
         $full_name = __NAMESPACE__ . '\\' . $class_name;
         if (class_exists($full_name)) {
-            return new $full_name();
+            return new $full_name($request);
         }
-        return new self();
+        return new self($request);
     }
 
-    public function __construct() {
-        
+    public function __construct($request) {
+        $this->request = $request;
     }
 
     /**
@@ -52,8 +79,8 @@ class BaseJrApi {
      * 
      * @param Http\Request $request
      */
-    public function before($request) {
-        $this->request = $request;
+    public function before() {
+        
     }
 
     /**
@@ -68,7 +95,7 @@ class BaseJrApi {
         }
 
         $dir = APP_TMP_DIR . '/transmission/';
-        $api = $this->request->get_api();
+        $api = self::get_api_name($this->request->get_http_data());
 
         if (isset($api[1])) {
             $dir .= $api[0] . '/';
@@ -92,7 +119,10 @@ class BaseJrApi {
 
         $body = $this->response->get_body();
 
-        $str = zlib_decode($body);
+        $str = @zlib_decode($body);
+        if ($str === false) {
+            $str = $body;
+        }
         $json = json_decode($str);
 
         if ($json !== null) {

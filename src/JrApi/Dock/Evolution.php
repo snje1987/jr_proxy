@@ -8,8 +8,8 @@ use App\Model\ShipList;
 
 class Evolution extends BaseJrApi {
 
-    public function __construct() {
-        
+    public function __construct($request) {
+        parent::__construct($request);
     }
 
     /**

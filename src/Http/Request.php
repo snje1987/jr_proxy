@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use Workerman\Connection\TcpConnection;
+use Exception;
 
 class Request extends Base {
 
@@ -44,26 +45,6 @@ class Request extends Base {
         return $request;
     }
 
-    public function get_api() {
-        $host = $this->http_data['host'];
-
-        if ($host === 'version.jr.moefantasy.com' || $host === 'version.channel.jr.moefantasy.com') {
-            return ['fhx'];
-        }
-
-        if (preg_match('/s[0-9]+\.jr\.moefantasy\.com/', $host)) {
-            $url = $this->http_data['url'];
-
-            if (preg_match('/^\/?(\w+)\/(\w+).*$/', $url, $matches)) {
-                $space_name = $matches[1];
-                $class_name = $matches[2];
-
-                return [$space_name, $class_name];
-            }
-        }
-        return null;
-    }
-
     public function get_info() {
         $request = $this->http_data['method'] . ' http://' . $this->http_data['host'] . ':' . $this->http_data['port'] . $this->http_data['url'];
         return $request;
@@ -87,7 +68,7 @@ class Request extends Base {
         if ($info[0] !== 'GET' && $info[0] !== 'POST') {
             throw new Exception('request error');
         }
-        
+
         if ($info[0] === 'GET') {
             $http_data['length'] = 0;
         }

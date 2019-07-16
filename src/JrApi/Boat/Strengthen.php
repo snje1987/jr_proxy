@@ -8,8 +8,8 @@ use App\Model\ShipList;
 
 class Strengthen extends BaseJrApi {
 
-    public function __construct() {
-        
+    public function __construct($request) {
+        parent::__construct($request);
     }
 
     /**
@@ -39,7 +39,7 @@ class Strengthen extends BaseJrApi {
 
         $ship_list_obj = new ShipList();
         $ship_list_obj->del_ships($ids);
-        
+
         if (!isset($json['shipVO'])) {
             return;
         }

@@ -12,8 +12,8 @@ class Fhx extends BaseJrApi {
         self::$fhx = \App\Config::get('main', 'fhx', 1);
     }
 
-    public function __construct() {
-        
+    public function __construct($request) {
+        parent::__construct($request);
     }
 
     /**
@@ -23,6 +23,8 @@ class Fhx extends BaseJrApi {
      * @return Http\Response
      */
     public function after($response) {
+
+        parent::after($response);
 
         if (self::$fhx != 1) {
             return;

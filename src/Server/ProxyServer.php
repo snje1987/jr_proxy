@@ -30,16 +30,23 @@ class ProxyServer {
                 return;
             }
 
-            $api = $client->request->get_api();
+            $api_obj = BaseJrApi::create($client->request);
 
-            if ($api !== null) {
-                $api_obj = BaseJrApi::create($api);
-                $api_obj->before($client->request);
+            if ($api_obj !== null) {
+                $response = $api_obj->before();
+
+                if ($response !== null) {
+                    $info = '[HOOK] ' . $client->request->get_info();
+                    $info .= ' ' . $response->get_info() . "\n";
+                    echo $info;
+
+                    $client->send($response->get_response());
+                    $client->close();
+                    return;
+                }
+
                 $client->api_obj = $api_obj;
             }
-
-            $info = $client->request->get_info();
-            echo $info . "\n";
 
             $remote = new AsyncTcpConnection("tcp://" . $client->request->get_addr());
             $remote->client = $client;
