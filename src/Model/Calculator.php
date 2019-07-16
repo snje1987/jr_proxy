@@ -18,14 +18,17 @@ class Calculator {
         $values = \App\Config::get('main', 'values', []);
         for ($i = 0; $i < 4; $i++) {
             $this->values[$i] = isset($values[$i]) ? intval($values[$i]) : 1;
-            if ($this->values[$i] < 0) {
-                $this->values[$i] = 0;
+            if ($this->values[$i] <= 0) {
+                $this->values[$i] = 1;
             }
         }
 
         $points = \App\Config::get('main', 'points', []);
         for ($i = 0; $i < 4; $i++) {
             $this->points[$i] = isset($points[$i]) ? intval($points[$i]) : 1;
+            if ($this->points[$i] < 0) {
+                $this->points[$i] = 0;
+            }
         }
     }
 
