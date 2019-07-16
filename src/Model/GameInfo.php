@@ -7,7 +7,6 @@ class GameInfo {
     const GAME_VERSION = '4.5.0';
     const GAME_INFO_URL = 'http://login.jr.moefantasy.com:80/index/getInitConfigs/';
 
-    protected static $instance = null;
     protected $file;
     protected $data_version = '';
     protected $app_version = '';
@@ -30,18 +29,7 @@ class GameInfo {
         return $json;
     }
 
-    /**
-     * 
-     * @return self
-     */
-    public static function get() {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
-    protected function __construct() {
+    public function __construct() {
         $this->file = APP_DATA_DIR . '/game_info.json';
 
         $this->load_info();

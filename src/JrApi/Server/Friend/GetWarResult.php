@@ -1,12 +1,14 @@
 <?php
 
-namespace App\JrApi\Server\Api;
+namespace App\JrApi\Server\Friend;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
 use App\Model\PlayerInfo;
+use App\Model\CurrentWar;
+use App\Config;
 
-class InitGame extends BaseJrApi {
+class GetWarResult extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
@@ -22,6 +24,10 @@ class InitGame extends BaseJrApi {
 
         parent::after($response);
 
+        if (Config::get('main', 'war_log', 0) != 1) {
+            return;
+        }
+
         $body = $this->response->get_body();
 
         $str = zlib_decode($body);
@@ -31,26 +37,12 @@ class InitGame extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['userShipVO'])) {
+        if (!isset($json['warResult'])) {
             return;
         }
 
-        $ship_list = $json['userShipVO'];
-
-        $list = [];
-
-        foreach ($ship_list as $v) {
-            $id = $v['id'];
-            $list[$id] = [
-                'title' => $v['title'],
-                'shipCid' => $v['shipCid'],
-                'isLocked' => $v['isLocked'],
-                'strengthenAttribute' => $v['strengthenAttribute'],
-            ];
-        }
-
-        $player_info = new PlayerInfo();
-        $player_info->set_all_ships($list);
+        $current_war = new CurrentWar();
+        $current_war->set_result($json)->save_to('friend');
     }
 
 }

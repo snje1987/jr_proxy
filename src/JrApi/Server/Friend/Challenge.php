@@ -1,12 +1,13 @@
 <?php
 
-namespace App\JrApi\Server\Boat;
+namespace App\JrApi\Server\Friend;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\PlayerInfo;
+use App\Model\CurrentWar;
+use App\Config;
 
-class ConvertSkill extends BaseJrApi {
+class Challenge extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
@@ -22,6 +23,10 @@ class ConvertSkill extends BaseJrApi {
 
         parent::after($response);
 
+        if (Config::get('main', 'war_log', 0) != 1) {
+            return;
+        }
+
         $body = $this->response->get_body();
 
         $str = zlib_decode($body);
@@ -31,22 +36,18 @@ class ConvertSkill extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['shipVO'])) {
+        if (!isset($json['warReport'])) {
             return;
         }
 
-        $new_ship = $json['shipVO'];
+        $http_data = $this->request->get_http_data();
+        $url = $http_data['url'];
 
-        $id = $new_ship['id'];
-        $ship = [
-            'title' => $new_ship['title'],
-            'shipCid' => $new_ship['shipCid'],
-            'isLocked' => $new_ship['isLocked'],
-            'strengthenAttribute' => $new_ship['strengthenAttribute'],
-        ];
-
-        $player_info = new PlayerInfo();
-        $player_info->set_ship($id, $ship);
+        $current_war = new CurrentWar();
+        if (preg_match('/^\/friend\/challenge\/(\d+)\/.*$/', $url, $matches)) {
+            $current_war->set_name($matches[1]);
+        }
+        $current_war->set_day($json)->save();
     }
 
 }

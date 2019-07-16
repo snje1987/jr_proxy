@@ -3,10 +3,9 @@
 namespace App\JrApi;
 
 use App\Http;
+use App\Config;
 
 class BaseJrApi {
-
-    protected static $save_api_transmission = 0;
 
     /**
      * @var Http\Request 
@@ -17,10 +16,6 @@ class BaseJrApi {
      * @var Http\Response 
      */
     protected $response;
-
-    public static function init_cfg() {
-        self::$save_api_transmission = \App\Config::get('debug', 'save_api_transmission', 0);
-    }
 
     public static function get_api_name($http_data) {
         $host = $http_data['host'];
@@ -87,7 +82,7 @@ class BaseJrApi {
      */
     public function after($response) {
         $this->response = $response;
-        if (self::$save_api_transmission != 1) {
+        if (Config::get('debug', 'save_api_transmission', 0) != 1) {
             return;
         }
 
@@ -128,5 +123,3 @@ class BaseJrApi {
     }
 
 }
-
-BaseJrApi::init_cfg();

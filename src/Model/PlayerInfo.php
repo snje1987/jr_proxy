@@ -4,22 +4,10 @@ namespace App\Model;
 
 class PlayerInfo {
 
-    protected static $instance = null;
     protected $file;
     protected $ship_list = [];
 
-    /**
-     * 
-     * @return self
-     */
-    public static function get() {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
-    protected function __construct() {
+    public function __construct() {
         $this->file = APP_DATA_DIR . '/player_info.json';
 
         $this->load_info();
@@ -81,7 +69,7 @@ class PlayerInfo {
             return null;
         }
 
-        $game_info = GameInfo::get();
+        $game_info = new GameInfo();
 
         $card = $game_info->get_ship_card($ship['shipCid']);
         if ($card === null) {
@@ -103,7 +91,7 @@ class PlayerInfo {
 
     public function get_target_ships() {
 
-        $game_info = GameInfo::get();
+        $game_info = new GameInfo();
 
         $list = [];
 
@@ -131,7 +119,7 @@ class PlayerInfo {
     }
 
     public function get_material_ships($cid = null) {
-        $game_info = GameInfo::get();
+        $game_info = new GameInfo();
 
         $list = [];
 

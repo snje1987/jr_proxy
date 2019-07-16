@@ -14,7 +14,7 @@ class ProxyServer {
         $port = \App\Config::get('proxy_server', 'port', 14201);
 
         $http_worker = new Worker("tcp://0.0.0.0:$port");
-        $http_worker->count = 4;
+        $http_worker->count = 2;
         $http_worker->onMessage = [$this, 'on_request'];
         $http_worker->name = 'ProxyServer';
     }

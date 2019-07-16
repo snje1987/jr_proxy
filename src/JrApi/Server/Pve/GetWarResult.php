@@ -5,6 +5,8 @@ namespace App\JrApi\Server\Pve;
 use App\Http;
 use App\JrApi\BaseJrApi;
 use App\Model\PlayerInfo;
+use App\Model\CurrentWar;
+use App\Config;
 
 class GetWarResult extends BaseJrApi {
 
@@ -31,22 +33,29 @@ class GetWarResult extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['newShipVO']) || !isset($json['newShipVO'][0])) {
+        if (!isset($json['warResult'])) {
             return;
         }
 
-        $new_ship = $json['newShipVO'][0];
+        if (Config::get('main', 'war_log', 0) == 1) {
+            $current_war = new CurrentWar();
+            $current_war->set_result($json)->save_to('pve');
+        }
 
-        $id = $new_ship['id'];
-        $ship = [
-            'title' => $new_ship['title'],
-            'shipCid' => $new_ship['shipCid'],
-            'isLocked' => $new_ship['isLocked'],
-            'strengthenAttribute' => $new_ship['strengthenAttribute'],
-        ];
+        if (isset($json['newShipVO']) && isset($json['newShipVO'][0])) {
+            $new_ship = $json['newShipVO'][0];
 
-        $player_info = PlayerInfo::get();
-        $player_info->set_ship($id, $ship);
+            $id = $new_ship['id'];
+            $ship = [
+                'title' => $new_ship['title'],
+                'shipCid' => $new_ship['shipCid'],
+                'isLocked' => $new_ship['isLocked'],
+                'strengthenAttribute' => $new_ship['strengthenAttribute'],
+            ];
+
+            $player_info = new PlayerInfo();
+            $player_info->set_ship($id, $ship);
+        }
     }
 
 }

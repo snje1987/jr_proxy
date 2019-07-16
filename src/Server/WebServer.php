@@ -10,7 +10,7 @@ class WebServer {
         $port = \App\Config::get('web_server', 'port', 14200);
 
         $http_worker = new Worker("http://0.0.0.0:$port");
-        $http_worker->count = 4;
+        $http_worker->count = 2;
         $http_worker->onMessage = [$this, 'on_message'];
         $http_worker->name = 'WebServer';
     }

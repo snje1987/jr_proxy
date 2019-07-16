@@ -14,8 +14,7 @@ class Boat extends BaseControler {
 
     public function c_index() {
 
-
-        $play_info = PlayerInfo::get();
+        $play_info = new PlayerInfo();
 
         $material = $play_info->get_material_ships();
         $target = $play_info->get_target_ships();
@@ -47,7 +46,7 @@ class Boat extends BaseControler {
                 throw new Exception('参数不合法');
             }
 
-            $player_info = PlayerInfo::get();
+            $player_info = new PlayerInfo();
 
             $target_ship = $player_info->get_target_ship($target);
             if ($target_ship === null) {

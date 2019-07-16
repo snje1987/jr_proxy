@@ -45,7 +45,7 @@ class SkillLevelUp extends BaseJrApi {
             'strengthenAttribute' => $new_ship['strengthenAttribute'],
         ];
 
-        $player_info = PlayerInfo::get();
+        $player_info = new PlayerInfo();
         $player_info->set_ship($id, $ship);
     }
 

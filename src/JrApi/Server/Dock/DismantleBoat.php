@@ -37,7 +37,7 @@ class DismantleBoat extends BaseJrApi {
 
         $ids = $json['delShips'];
 
-        $player_info = PlayerInfo::get();
+        $player_info = new PlayerInfo();
         $player_info->del_ships($ids);
     }
 

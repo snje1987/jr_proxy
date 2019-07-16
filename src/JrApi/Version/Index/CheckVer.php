@@ -5,6 +5,7 @@ namespace App\JrApi\Version\Index;
 use App\Http;
 use App\JrApi\BaseJrApi;
 use App\Model\GameInfo;
+use App\Config;
 
 class CheckVer extends BaseJrApi {
 
@@ -40,7 +41,7 @@ class CheckVer extends BaseJrApi {
 
         $data = json_decode($json, true);
 
-        if (self::$fhx != 0) {
+        if (Config::get('main', 'fhx', 1) != 0) {
             if (isset($data['cheatsCheck'])) {
                 $data['cheatsCheck'] = 1;
             }
@@ -52,11 +53,12 @@ class CheckVer extends BaseJrApi {
 
         $data_version = isset($data['DataVersion']) ? strval($data['DataVersion']) : '';
         if ($data_version !== '') {
-            GameInfo::get()->update_check($data_version);
+            $game_info = new GameInfo();
+            $game_info->update_check($data_version);
         }
 
         $json = json_encode($data);
-        
+
         if (isset($http_data['gzip']) && $http_data['gzip'] == true) {
             $body = zlib_encode($json, ZLIB_ENCODING_GZIP);
         }
@@ -68,5 +70,3 @@ class CheckVer extends BaseJrApi {
     }
 
 }
-
-CheckVer::init_cfg();
