@@ -38,6 +38,9 @@ class ProxyServer {
                 $client->api_obj = $api_obj;
             }
 
+            $info = $client->request->get_info();
+            echo $info . "\n";
+
             $remote = new AsyncTcpConnection("tcp://" . $client->request->get_addr());
             $remote->client = $client;
 

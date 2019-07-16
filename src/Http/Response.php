@@ -57,4 +57,27 @@ class Response extends Base {
         return "{$this->http_data['code']} {$size}";
     }
 
+    protected function decode_header($header_string) {
+        $line = parent::decode_header($header_string);
+
+        $info = explode(' ', $line);
+        if (count($info) < 3) {
+            throw new Exception('request error');
+        }
+
+        $http_data = $this->http_data;
+
+        if (strncasecmp($info[0], 'http', 4) !== 0) {
+            throw new Exception('非法数据');
+        }
+
+        $http_data['line'] = $line;
+        $http_data['type'] = 'response';
+        $http_data['code'] = intval($info[1]);
+        if ($http_data['length'] === -1 && $http_data['code'] != 200) {//不是200则没有响应内容
+            $http_data['length'] = 0;
+        }
+        $this->http_data = $http_data;
+    }
+
 }
