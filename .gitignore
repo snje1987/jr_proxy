@@ -1,6 +1,7 @@
-/nbproject/private
+/nbproject/
 /vendor/
 /composer.lock
 *.swp
 /config.php
 /tmp/
+/data/
