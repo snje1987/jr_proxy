@@ -8,9 +8,7 @@ class ShipList {
     protected $list = [];
 
     public function __construct() {
-        $dir = APP_ROOT . \App\Config::get('main', 'tmp', '/tmp');
-
-        $this->file = $dir . '/ship_list.json';
+        $this->file = APP_TMP_DIR . '/ship_list.json';
 
         $this->load_list();
     }

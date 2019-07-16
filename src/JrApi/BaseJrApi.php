@@ -67,7 +67,7 @@ class BaseJrApi {
             return;
         }
 
-        $dir = APP_ROOT . \App\Config::get('main', 'tmp', '/tmp') . '/transmission/';
+        $dir = APP_TMP_DIR . '/transmission/';
         $api = $this->request->get_api();
 
         if (isset($api[1])) {

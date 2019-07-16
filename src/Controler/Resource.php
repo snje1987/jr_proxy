@@ -26,7 +26,7 @@ class Resource extends BaseControler {
             return $this->router->show_404();
         }
 
-        $path = APP_ROOT . '/src/resource/' . $file;
+        $path = APP_RES_DIR . '/' . $file;
         if (file_exists($path)) {
             return $this->readfile($path);
         }

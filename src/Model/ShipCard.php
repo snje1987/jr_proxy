@@ -8,9 +8,7 @@ class ShipCard {
     protected $list = [];
 
     public function __construct() {
-        $dir = APP_ROOT . '/data';
-
-        $this->file = $dir . '/ship_card.json';
+        $this->file = APP_DATA_DIR . '/ship_card.json';
 
         $this->load_list();
     }

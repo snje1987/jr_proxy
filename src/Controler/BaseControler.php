@@ -37,7 +37,7 @@ abstract class BaseControler {
     }
 
     protected function display_tpl($tpl, $vars, $content_type = 'text/html; charset=utf-8') {
-        $this->tpl_path = APP_ROOT . '/src/theme/' . $tpl . '.php';
+        $this->tpl_path = APP_TPL_DIR . '/' . $tpl . '.php';
         if (!file_exists($this->tpl_path)) {
             return $this->router->show_404();
         }

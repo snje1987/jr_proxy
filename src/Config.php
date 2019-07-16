@@ -13,13 +13,26 @@ class Config {
     public static function init() {
         self::$inited = true;
 
-        $tmp_dir = APP_ROOT . self::get('main', 'tmp_dir', '/tmp');
+        define('APP_TPL_DIR', APP_ROOT . '/theme/tpl');
+        define('APP_RES_DIR', APP_ROOT . '/theme/res');
+
+        $tmp_dir = APP_ROOT . '/tmp';
 
         if (!file_exists($tmp_dir)) {
             mkdir($tmp_dir, 0777, true);
         }
 
-        Worker::$logFile = $tmp_dir . '/workerman.log';
+        define('APP_TMP_DIR', $tmp_dir);
+
+        $data_dir = APP_ROOT . '/data';
+
+        if (!file_exists($data_dir)) {
+            mkdir($data_dir, 0777, true);
+        }
+
+        define('APP_DATA_DIR', $data_dir);
+
+        Worker::$logFile = APP_TMP_DIR . '/workerman.log';
     }
 
     public static function load() {
