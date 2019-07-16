@@ -7,6 +7,8 @@ use Workerman\Worker;
 
 class Config {
 
+    const APP_VERSION = '1.0.0';
+
     protected static $cfg = null;
     protected static $inited = false;
 

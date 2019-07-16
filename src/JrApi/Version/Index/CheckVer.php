@@ -1,10 +1,12 @@
 <?php
 
-namespace App\JrApi;
+namespace App\JrApi\Version\Index;
 
 use App\Http;
+use App\JrApi\BaseJrApi;
+use App\Model\GameInfo;
 
-class Fhx extends BaseJrApi {
+class CheckVer extends BaseJrApi {
 
     protected static $fhx = 1;
 
@@ -26,31 +28,40 @@ class Fhx extends BaseJrApi {
 
         parent::after($response);
 
-        if (self::$fhx != 1) {
-            return;
-        }
-
         $http_data = $response->get_http_data();
         $body = $response->get_body();
 
         if (isset($http_data['gzip']) && $http_data['gzip'] == true) {
-            $data = zlib_decode($body);
+            $json = zlib_decode($body);
         }
         else {
-            $data = $body;
+            $json = $body;
         }
 
-        if (strpos($data, '"cheatsCheck":0') !== false) {
-            $data = str_replace('"cheatsCheck":0', '"cheatsCheck":1', $data);
-            $data = str_replace('censor', '2', $data);
+        $data = json_decode($json, true);
+
+        if (self::$fhx != 0) {
+            if (isset($data['cheatsCheck'])) {
+                $data['cheatsCheck'] = 1;
+            }
+            if (isset($data['ResUrl'])) {
+                $data['ResUrl'] = str_replace('censor', '2', $data['ResUrl']);
+            }
             echo "反和谐开启成功\n";
         }
 
+        $data_version = isset($data['DataVersion']) ? strval($data['DataVersion']) : '';
+        if ($data_version !== '') {
+            GameInfo::get()->update_check($data_version);
+        }
+
+        $json = json_encode($data);
+        
         if (isset($http_data['gzip']) && $http_data['gzip'] == true) {
-            $body = zlib_encode($data, ZLIB_ENCODING_GZIP);
+            $body = zlib_encode($json, ZLIB_ENCODING_GZIP);
         }
         else {
-            $body = $data;
+            $body = $json;
         }
 
         $response->set_body($body);
@@ -58,4 +69,4 @@ class Fhx extends BaseJrApi {
 
 }
 
-Fhx::init_cfg();
+CheckVer::init_cfg();

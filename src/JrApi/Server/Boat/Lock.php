@@ -1,10 +1,10 @@
 <?php
 
-namespace App\JrApi\Boat;
+namespace App\JrApi\Server\Boat;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\ShipList;
+use App\Model\PlayerInfo;
 
 class Lock extends BaseJrApi {
 
@@ -45,8 +45,8 @@ class Lock extends BaseJrApi {
             'strengthenAttribute' => $new_ship['strengthenAttribute'],
         ];
 
-        $ship_list_obj = new ShipList();
-        $ship_list_obj->set_ship($id, $ship);
+        $player_info = PlayerInfo::get();
+        $player_info->set_ship($id, $ship);
     }
 
 }

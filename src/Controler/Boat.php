@@ -2,7 +2,7 @@
 
 namespace App\Controler;
 
-use App\Model\ShipList;
+use App\Model\PlayerInfo;
 use App\Model\Calculator;
 use Exception;
 
@@ -15,10 +15,10 @@ class Boat extends BaseControler {
     public function c_index() {
 
 
-        $ship_list = new ShipList();
+        $play_info = PlayerInfo::get();
 
-        $material = $ship_list->get_material();
-        $target = $ship_list->get_target_list();
+        $material = $play_info->get_material_ships();
+        $target = $play_info->get_target_ships();
 
         $values = \App\Config::get('main', 'values');
         $points = \App\Config::get('main', 'points');
@@ -47,20 +47,20 @@ class Boat extends BaseControler {
                 throw new Exception('参数不合法');
             }
 
-            $ship_list = new ShipList();
+            $player_info = PlayerInfo::get();
 
-            $target_ship = $ship_list->get_target($target);
+            $target_ship = $player_info->get_target_ship($target);
             if ($target_ship === null) {
                 throw new Exception('强化目标不存在');
             }
 
-            $material_ships = $ship_list->get_material($material_cid);
+            $material_ships = $player_info->get_material_ships($material_cid);
 
             if (empty($material_ships)) {
                 throw new Exception('强化素在不存在');
             }
 
-            $calculator = new \App\Model\Calculator();
+            $calculator = new Calculator();
 
             $result = $calculator->cal($target_ship, $material_ships);
 

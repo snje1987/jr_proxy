@@ -1,12 +1,12 @@
 <?php
 
-namespace App\JrApi\Dock;
+namespace App\JrApi\Server\Boat;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\ShipList;
+use App\Model\PlayerInfo;
 
-class GetBoat extends BaseJrApi {
+class Strengthen extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
@@ -31,6 +31,15 @@ class GetBoat extends BaseJrApi {
             return;
         }
 
+        if (!isset($json['delShips'])) {
+            return;
+        }
+
+        $ids = $json['delShips'];
+
+        $player_info = PlayerInfo::get();
+        $player_info->del_ships($ids);
+
         if (!isset($json['shipVO'])) {
             return;
         }
@@ -45,8 +54,7 @@ class GetBoat extends BaseJrApi {
             'strengthenAttribute' => $new_ship['strengthenAttribute'],
         ];
 
-        $ship_list_obj = new ShipList();
-        $ship_list_obj->set_ship($id, $ship);
+        $player_info->set_ship($id, $ship);
     }
 
 }

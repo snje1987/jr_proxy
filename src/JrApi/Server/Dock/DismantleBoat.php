@@ -1,12 +1,12 @@
 <?php
 
-namespace App\JrApi\Dock;
+namespace App\JrApi\Server\Dock;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\ShipList;
+use App\Model\PlayerInfo;
 
-class Evolution extends BaseJrApi {
+class DismantleBoat extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
@@ -31,24 +31,14 @@ class Evolution extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['shipVO']) || !isset($json['shipVO'][0])) {
+        if (!isset($json['delShips'])) {
             return;
         }
 
+        $ids = $json['delShips'];
 
-
-        $new_ship = $json['shipVO'][0];
-
-        $id = $new_ship['id'];
-        $ship = [
-            'title' => $new_ship['title'],
-            'shipCid' => $new_ship['shipCid'],
-            'isLocked' => $new_ship['isLocked'],
-            'strengthenAttribute' => $new_ship['strengthenAttribute'],
-        ];
-
-        $ship_list_obj = new ShipList();
-        $ship_list_obj->set_ship($id, $ship);
+        $player_info = PlayerInfo::get();
+        $player_info->del_ships($ids);
     }
 
 }

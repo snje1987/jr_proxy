@@ -1,10 +1,10 @@
 <?php
 
-namespace App\JrApi\Api;
+namespace App\JrApi\Server\Api;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\ShipList;
+use App\Model\PlayerInfo;
 
 class InitGame extends BaseJrApi {
 
@@ -49,8 +49,8 @@ class InitGame extends BaseJrApi {
             ];
         }
 
-        $ship_list_obj = new ShipList();
-        $ship_list_obj->set_list($list);
+        $player_info = PlayerInfo::get();
+        $player_info->set_all_ships($list);
     }
 
 }

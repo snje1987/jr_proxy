@@ -1,12 +1,12 @@
 <?php
 
-namespace App\JrApi\Boat;
+namespace App\JrApi\Server\Dock;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\ShipList;
+use App\Model\PlayerInfo;
 
-class ConvertSkill extends BaseJrApi {
+class Evolution extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
@@ -31,11 +31,13 @@ class ConvertSkill extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['shipVO'])) {
+        if (!isset($json['shipVO']) || !isset($json['shipVO'][0])) {
             return;
         }
 
-        $new_ship = $json['shipVO'];
+
+
+        $new_ship = $json['shipVO'][0];
 
         $id = $new_ship['id'];
         $ship = [
@@ -45,8 +47,8 @@ class ConvertSkill extends BaseJrApi {
             'strengthenAttribute' => $new_ship['strengthenAttribute'],
         ];
 
-        $ship_list_obj = new ShipList();
-        $ship_list_obj->set_ship($id, $ship);
+        $player_info = PlayerInfo::get();
+        $player_info->set_ship($id, $ship);
     }
 
 }

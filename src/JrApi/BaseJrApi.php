@@ -24,20 +24,24 @@ class BaseJrApi {
 
     public static function get_api_name($http_data) {
         $host = $http_data['host'];
+        $url = $http_data['url'];
 
-        if ($host === 'version.jr.moefantasy.com' || $host === 'version.channel.jr.moefantasy.com') {
-            return ['fhx'];
+        if ($host === 'version.jr.moefantasy.com' ||
+                $host === 'version.channel.jr.moefantasy.com') {
+            $top_name = 'version';
+        }
+        elseif ($host === 'login.jr.moefantasy.com') {
+            $top_name = 'login';
+        }
+        elseif (preg_match('/s[0-9]+\.jr\.moefantasy\.com/', $host)) {
+            $top_name = 'server';
         }
 
-        if (preg_match('/s[0-9]+\.jr\.moefantasy\.com/', $host)) {
-            $url = $http_data['url'];
+        if (preg_match('/^\/?(\w+)\/(\w+).*$/', $url, $matches)) {
+            $space_name = $matches[1];
+            $class_name = $matches[2];
 
-            if (preg_match('/^\/?(\w+)\/(\w+).*$/', $url, $matches)) {
-                $space_name = $matches[1];
-                $class_name = $matches[2];
-
-                return [$space_name, $class_name];
-            }
+            return [$top_name, $space_name, $class_name];
         }
         return null;
     }
@@ -49,19 +53,12 @@ class BaseJrApi {
     public static function create($request) {
         $http_data = $request->get_http_data();
 
-        $api = self::get_api_name($http_data);
-        if ($api === null) {
+        $api_naem = self::get_api_name($http_data);
+        if ($api_naem === null) {
             return null;
         }
 
-        if (!isset($api[0])) {
-            return new self($request);
-        }
-
-        $class_name = ucfirst($api[0]);
-        if (isset($api[1])) {
-            $class_name .= '\\' . ucfirst($api[1]);
-        }
+        $class_name = ucfirst($api_naem[0]) . '\\' . ucfirst($api_naem[1]) . '\\' . ucfirst($api_naem[2]);
 
         $full_name = __NAMESPACE__ . '\\' . $class_name;
         if (class_exists($full_name)) {
@@ -94,16 +91,15 @@ class BaseJrApi {
             return;
         }
 
-        $dir = APP_TMP_DIR . '/transmission/';
+        $dir = APP_TMP_DIR . '/trans/';
         $api = self::get_api_name($this->request->get_http_data());
 
-        if (isset($api[1])) {
-            $dir .= $api[0] . '/';
-            $file_name = $api[1];
+        if ($api === null) {
+            return;
         }
-        else {
-            $file_name = $api[0];
-        }
+
+        $dir .= $api[0] . '/' . $api[1] . '/';
+        $file_name = $api[2];
 
         if (!file_exists($dir)) {
             mkdir($dir, 0777, true);

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\JrApi\Pve;
+namespace App\JrApi\Server\Boat;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\ShipList;
+use App\Model\PlayerInfo;
 
-class GetWarResult extends BaseJrApi {
+class ConvertSkill extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
@@ -31,11 +31,11 @@ class GetWarResult extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['newShipVO']) || !isset($json['newShipVO'][0])) {
+        if (!isset($json['shipVO'])) {
             return;
         }
 
-        $new_ship = $json['newShipVO'][0];
+        $new_ship = $json['shipVO'];
 
         $id = $new_ship['id'];
         $ship = [
@@ -45,8 +45,8 @@ class GetWarResult extends BaseJrApi {
             'strengthenAttribute' => $new_ship['strengthenAttribute'],
         ];
 
-        $ship_list_obj = new ShipList();
-        $ship_list_obj->set_ship($id, $ship);
+        $player_info = PlayerInfo::get();
+        $player_info->set_ship($id, $ship);
     }
 
 }

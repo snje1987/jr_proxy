@@ -2,72 +2,88 @@
 
 namespace App\Model;
 
-class ShipList {
+class PlayerInfo {
 
+    protected static $instance = null;
     protected $file;
-    protected $list = [];
+    protected $ship_list = [];
 
-    public function __construct() {
-        $this->file = APP_TMP_DIR . '/ship_list.json';
-
-        $this->load_list();
+    /**
+     * 
+     * @return self
+     */
+    public static function get() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 
-    public function set_list($list) {
-        $this->list = $list;
-        $this->save_list();
+    protected function __construct() {
+        $this->file = APP_DATA_DIR . '/player_info.json';
+
+        $this->load_info();
     }
 
-    public function save_list() {
-        ksort($this->list);
+    public function save_info() {
+        $data = [
+            'ship_list' => $this->ship_list,
+        ];
 
-        $json = json_encode($this->list, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
         file_put_contents($this->file, $json);
     }
 
-    public function load_list() {
+    public function load_info() {
         if (file_exists($this->file)) {
             $json = file_get_contents($this->file);
-            $this->list = json_decode($json, true);
+            $data = json_decode($json, true);
         }
         else {
-            $this->list = [];
+            $data = [];
         }
+
+        $this->ship_list = isset($data['ship_list']) ? $data['ship_list'] : [];
     }
 
-    public function get_list() {
-        return $this->list;
+    public function set_all_ships($ship_list) {
+        $this->ship_list = $ship_list;
+        $this->save_info();
+    }
+
+    public function get_all_ships() {
+        return $this->ship_list;
     }
 
     public function set_ship($id, $ship) {
-        $this->list[$id] = $ship;
+        $this->ship_list[$id] = $ship;
 
-        $this->save_list();
+        $this->save_info();
     }
 
     public function del_ships($ids) {
         foreach ($ids as $id) {
-            if (isset($this->list[$id])) {
-                unset($this->list[$id]);
+            if (isset($this->ship_list[$id])) {
+                unset($this->ship_list[$id]);
             }
         }
-        $this->save_list();
+        $this->save_info();
     }
 
-    public function get_target($id) {
-        if (!isset($this->list[$id])) {
+    public function get_target_ship($id) {
+        if (!isset($this->ship_list[$id])) {
             return null;
         }
 
-        $ship = $this->list[$id];
+        $ship = $this->ship_list[$id];
         if ($ship['isLocked'] != 1) {
             return null;
         }
 
-        $ship_card = new ShipCard();
+        $game_info = GameInfo::get();
 
-        $card = $ship_card->get_ship($ship['shipCid']);
+        $card = $game_info->get_ship_card($ship['shipCid']);
         if ($card === null) {
             return null;
         }
@@ -85,15 +101,15 @@ class ShipList {
         return null;
     }
 
-    public function get_target_list() {
+    public function get_target_ships() {
 
-        $ship_card = new ShipCard();
+        $game_info = GameInfo::get();
 
         $list = [];
 
-        foreach ($this->list as $id => $v) {
+        foreach ($this->ship_list as $id => $v) {
             if ($v['isLocked'] == 1) {
-                $card = $ship_card->get_ship($v['shipCid']);
+                $card = $game_info->get_ship_card($v['shipCid']);
                 if ($card !== null) {
                     $cur_strengthen = $v['strengthenAttribute'];
                     $full_strengthen = $card['strengthenTop'];
@@ -108,18 +124,18 @@ class ShipList {
                 }
             }
         }
-        
+
         ksort($list);
 
         return $list;
     }
 
-    public function get_material($cid = null) {
-        $ship_card = new ShipCard();
+    public function get_material_ships($cid = null) {
+        $game_info = GameInfo::get();
 
         $list = [];
 
-        foreach ($this->list as $id => $v) {
+        foreach ($this->ship_list as $id => $v) {
             if ($v['isLocked'] == 0) {
                 if (!isset($list[$v['shipCid']])) {
 
@@ -127,7 +143,7 @@ class ShipList {
                         continue;
                     }
 
-                    $card = $ship_card->get_ship($v['shipCid']);
+                    $card = $game_info->get_ship_card($v['shipCid']);
 
                     if ($card === null) {
                         continue;
