@@ -22,6 +22,10 @@ class Challenge extends BaseJrApi {
     public function after($response) {
 
         parent::after($response);
+        
+        if ($this->uid === null) {
+            return;
+        }
 
         if (Config::get('main', 'war_log', 0) != 1) {
             return;
@@ -43,7 +47,7 @@ class Challenge extends BaseJrApi {
         $http_data = $this->request->get_http_data();
         $url = $http_data['url'];
 
-        $current_war = new CurrentWar();
+        $current_war = new CurrentWar($this->uid);
         if (preg_match('/^\/pvp\/challenge\/(\d+)\/.*$/', $url, $matches)) {
             $current_war->set_name($matches[1]);
         }

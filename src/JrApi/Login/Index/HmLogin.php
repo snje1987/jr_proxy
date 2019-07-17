@@ -1,13 +1,12 @@
 <?php
 
-namespace App\JrApi\Server\Friend;
+namespace App\JrApi\Login\Index;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\CurrentWar;
-use App\Config;
+use App\Model\LoginInfo;
 
-class GetWarResult extends BaseJrApi {
+class HmLogin extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
@@ -23,14 +22,6 @@ class GetWarResult extends BaseJrApi {
 
         parent::after($response);
 
-        if ($this->uid === null) {
-            return;
-        }
-
-        if (Config::get('main', 'war_log', 0) != 1) {
-            return;
-        }
-
         $body = $this->response->get_body();
 
         $str = zlib_decode($body);
@@ -40,12 +31,11 @@ class GetWarResult extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['warResult'])) {
+        if (!isset($json['userId']) || !isset($json['hf_skey'])) {
             return;
         }
-
-        $current_war = new CurrentWar($this->uid);
-        $current_war->set_result($json)->save_to('friend');
+        
+        LoginInfo::get()->update($json['userId'], $json['hf_skey']);
     }
 
 }

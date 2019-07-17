@@ -7,11 +7,18 @@
     <body>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-6 col-xs-12"><h3>强化目标</h3></div>
-                <div class="col-sm-6 col-xs-12"> <h3>可用狗粮</h3></div>
+                <select name="uid">
+                    <?php foreach ($uid_list as $uid) { ?>
+                        <option value="<?= $uid ?>"<?= $uid == $cur_uid ? ' selected' : '' ?>><?= $uid ?></option>
+                    <?php } ?>
+                </select>
             </div>
             <div class="row">
-                <div class="col-sm-6 col-xs-12" style="height:500px;overflow-y:auto;">
+                <div class="col-sm-6 col-xs-12"><h3>强化目标</h3></div>
+                <div class="col-sm-6 col-xs-12"> <h3>可用素材</h3></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6 col-xs-12" style="height:400px;overflow-y:auto;">
                     <table class="table table-bordered table-hover table-condensed table-striped">
                         <tr>
                             <td width="50" class="text-center">选择</td>
@@ -33,7 +40,7 @@
                         <?php } ?>
                     </table>
                 </div>
-                <div class="col-sm-6 col-xs-12" style="height:500px;overflow-y:auto;">
+                <div class="col-sm-6 col-xs-12" style="height:400px;overflow-y:auto;">
 
                     <table class="table table-bordered table-hover table-condensed table-striped">
                         <tr>
@@ -98,7 +105,11 @@
                         target: 'input[name="target"]',
                         material: 'input[name="material"]',
                         pop: '#result_dlg',
-                        table: '#result_table'
+                        table: '#result_table',
+                        uid: '<?= $cur_uid ?>'
+                    });
+                    $('select[name="uid"]').change(function () {
+                        location.href = '/boat/index?uid=' + $(this).val();
                     });
                 });
             })(jQuery);

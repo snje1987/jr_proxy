@@ -4,17 +4,25 @@ namespace App\Model;
 
 class CurrentWar {
 
-    protected $tmp_file;
+    protected $file;
     protected $data_dir;
     protected $war_spy;
     protected $war_day;
     protected $war_result;
     protected $type;
     protected $name;
+    protected $uid;
 
-    public function __construct() {
-        $this->file = APP_TMP_DIR . '/current_war.json';
-        $this->data_dir = APP_DATA_DIR . '/war_log/';
+    public function __construct($uid) {
+        $this->uid = $uid;
+
+        $tmp_dir = APP_TMP_DIR . '/current_war/';
+        if (!file_exists($tmp_dir)) {
+            mkdir($tmp_dir, 0777, true);
+        }
+        
+        $this->file = $tmp_dir . $this->uid . '.json';
+        $this->data_dir = APP_DATA_DIR . '/war_log/' . $this->uid . '/';
 
         $this->load();
     }

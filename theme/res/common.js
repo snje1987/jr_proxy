@@ -46,7 +46,8 @@
             target: '',
             material: '',
             pop: '',
-            table: ''
+            table: '',
+            uid: ''
         };
         $.extend(defaults, defaults, options);
 
@@ -72,6 +73,7 @@
             var post = {};
             post.target = target;
             post.material = JSON.stringify(material);
+            post.uid = defaults.uid;
 
             $.post('/boat/calc', post, null, 'json').done(function (data) {
                 if (data.error !== 0) {

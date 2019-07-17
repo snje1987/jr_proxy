@@ -23,6 +23,10 @@ class GetWarResult extends BaseJrApi {
     public function after($response) {
 
         parent::after($response);
+        
+        if ($this->uid === null) {
+            return;
+        }
 
         $body = $this->response->get_body();
 
@@ -38,7 +42,7 @@ class GetWarResult extends BaseJrApi {
         }
 
         if (Config::get('main', 'war_log', 0) == 1) {
-            $current_war = new CurrentWar();
+            $current_war = new CurrentWar($this->uid);
             $current_war->set_result($json)->save_to('pve');
         }
 
@@ -53,7 +57,7 @@ class GetWarResult extends BaseJrApi {
                 'strengthenAttribute' => $new_ship['strengthenAttribute'],
             ];
 
-            $player_info = new PlayerInfo();
+            $player_info = new PlayerInfo($this->uid);
             $player_info->set_ship($id, $ship);
         }
     }

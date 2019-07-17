@@ -23,6 +23,10 @@ class Spy extends BaseJrApi {
 
         parent::after($response);
 
+        if ($this->uid === null) {
+            return;
+        }
+
         if (Config::get('main', 'war_log', 0) != 1) {
             return;
         }
@@ -40,7 +44,7 @@ class Spy extends BaseJrApi {
             return;
         }
 
-        $current_war = new CurrentWar();
+        $current_war = new CurrentWar($this->uid);
         $current_war->set_spy($json)->set_type('pvp')->save();
     }
 

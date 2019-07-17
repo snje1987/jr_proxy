@@ -4,7 +4,6 @@ namespace App\JrApi\Server\Pvp;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\PlayerInfo;
 use App\Model\CurrentWar;
 use App\Config;
 
@@ -23,6 +22,10 @@ class GetWarResult extends BaseJrApi {
     public function after($response) {
 
         parent::after($response);
+        
+        if ($this->uid === null) {
+            return;
+        }
 
         if (Config::get('main', 'war_log', 0) != 1) {
             return;
@@ -41,7 +44,7 @@ class GetWarResult extends BaseJrApi {
             return;
         }
 
-        $current_war = new CurrentWar();
+        $current_war = new CurrentWar($this->uid);
         $current_war->set_result($json)->save_to('pvp');
     }
 

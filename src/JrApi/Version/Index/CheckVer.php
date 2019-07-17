@@ -53,8 +53,7 @@ class CheckVer extends BaseJrApi {
 
         $data_version = isset($data['DataVersion']) ? strval($data['DataVersion']) : '';
         if ($data_version !== '') {
-            $game_info = new GameInfo();
-            $game_info->update_check($data_version);
+            GameInfo::get()->update_check($data_version);
         }
 
         $json = json_encode($data);

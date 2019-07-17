@@ -22,6 +22,10 @@ class SkillLevelUp extends BaseJrApi {
 
         parent::after($response);
 
+        if ($this->uid === null) {
+            return;
+        }
+
         $body = $this->response->get_body();
 
         $str = zlib_decode($body);
@@ -45,7 +49,7 @@ class SkillLevelUp extends BaseJrApi {
             'strengthenAttribute' => $new_ship['strengthenAttribute'],
         ];
 
-        $player_info = new PlayerInfo();
+        $player_info = new PlayerInfo($this->uid);
         $player_info->set_ship($id, $ship);
     }
 

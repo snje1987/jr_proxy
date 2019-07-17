@@ -48,4 +48,9 @@ class Router {
         $this->connection->send($msg);
     }
 
+    public function redirect($url) {
+        \Workerman\Protocols\Http::header('Location:' . $url, true, 302);
+        $this->connection->send("");
+    }
+
 }

@@ -7,7 +7,7 @@ use Workerman\Worker;
 $root = dirname(__DIR__);
 require_once $root . '/vendor/autoload.php';
 
-Config::load();
+App::init();
 
 $http_server = new Server\ProxyServer();
 

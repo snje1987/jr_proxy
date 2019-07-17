@@ -16,6 +16,7 @@ class BaseJrApi {
      * @var Http\Response 
      */
     protected $response;
+    protected $uid;
 
     public static function get_api_name($http_data) {
         $host = $http_data['host'];
@@ -64,6 +65,10 @@ class BaseJrApi {
 
     public function __construct($request) {
         $this->request = $request;
+
+        if ($request->ukey !== null) {
+            $this->uid = \App\Model\LoginInfo::get()->query_uid($request->ukey);
+        }
     }
 
     /**

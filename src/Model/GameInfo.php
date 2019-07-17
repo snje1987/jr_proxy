@@ -4,8 +4,12 @@ namespace App\Model;
 
 class GameInfo {
 
+    protected static $instance = null;
+    protected static $timestamp = 0;
+
     const GAME_VERSION = '4.5.0';
     const GAME_INFO_URL = 'http://login.jr.moefantasy.com:80/index/getInitConfigs/';
+    const DATA_FILE = APP_DATA_DIR . '/game_info.json';
 
     protected $file;
     protected $data_version = '';
@@ -29,36 +33,28 @@ class GameInfo {
         return $json;
     }
 
-    public function __construct() {
-        $this->file = APP_DATA_DIR . '/game_info.json';
+    /**
+     * @return self
+     */
+    public static function get() {
 
-        $this->load_info();
-    }
-
-    public function save_info() {
-        $data = [
-            'data_version' => $this->data_version,
-            'app_version' => $this->app_version,
-            'ship_cards' => $this->ship_cards,
-        ];
-
-        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
-        file_put_contents($this->file, $json);
-    }
-
-    public function load_info() {
-        if (file_exists($this->file)) {
-            $json = file_get_contents($this->file);
-            $data = json_decode($json, true);
+        if (file_exists(self::DATA_FILE)) {
+            $mtime = filemtime(self::DATA_FILE);
         }
         else {
-            $data = [];
+            $mtime = 0;
         }
 
-        $this->data_version = isset($data['data_version']) ? strval($data['data_version']) : '';
-        $this->app_version = isset($data['app_version']) ? strval($data['app_version']) : '';
-        $this->ship_cards = isset($data['ship_cards']) ? $data['ship_cards'] : [];
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        if (self::$timestamp != $mtime) {
+            self::$instance->load_info();
+            self::$timestamp = $mtime;
+        }
+
+        return self::$instance;
     }
 
     public function update_info() {
@@ -79,7 +75,7 @@ class GameInfo {
         }
 
         $this->data_version = $json['DataVersion'];
-        $this->app_version = \App\Config::APP_VERSION;
+        $this->app_version = \App\App::APP_VERSION;
 
         $this->ship_cards = [];
 
@@ -102,7 +98,7 @@ class GameInfo {
     }
 
     public function update_check($new_data_version) {
-        if ($this->app_version !== \App\Config::APP_VERSION ||
+        if ($this->app_version !== \App\App::APP_VERSION ||
                 $this->data_version !== $new_data_version) {
             $this->update_info();
         }
@@ -113,6 +109,38 @@ class GameInfo {
             return $this->ship_cards[$cid];
         }
         return null;
+    }
+
+    ///////////////////////////
+
+    protected function __construct() {
+        
+    }
+
+    protected function save_info() {
+        $data = [
+            'data_version' => $this->data_version,
+            'app_version' => $this->app_version,
+            'ship_cards' => $this->ship_cards,
+        ];
+
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        file_put_contents(self::DATA_FILE, $json);
+    }
+
+    protected function load_info() {
+        if (file_exists(self::DATA_FILE)) {
+            $json = file_get_contents(self::DATA_FILE);
+            $data = json_decode($json, true);
+        }
+        else {
+            $data = [];
+        }
+
+        $this->data_version = isset($data['data_version']) ? strval($data['data_version']) : '';
+        $this->app_version = isset($data['app_version']) ? strval($data['app_version']) : '';
+        $this->ship_cards = isset($data['ship_cards']) ? $data['ship_cards'] : [];
     }
 
 }

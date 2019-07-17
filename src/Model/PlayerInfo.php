@@ -4,11 +4,20 @@ namespace App\Model;
 
 class PlayerInfo {
 
+    const DATA_DIR = APP_DATA_DIR . '/player_info/';
+
     protected $file;
+    protected $uid;
     protected $ship_list = [];
 
-    public function __construct() {
-        $this->file = APP_DATA_DIR . '/player_info.json';
+    public function __construct($uid) {
+        $this->uid = $uid;
+
+        if (!file_exists(self::DATA_DIR)) {
+            mkdir(self::DATA_DIR, 0777, true);
+        }
+
+        $this->file = self::DATA_DIR . $this->uid . '.json';
 
         $this->load_info();
     }
@@ -36,6 +45,7 @@ class PlayerInfo {
     }
 
     public function set_all_ships($ship_list) {
+        ksort($ship_list);
         $this->ship_list = $ship_list;
         $this->save_info();
     }
@@ -69,7 +79,7 @@ class PlayerInfo {
             return null;
         }
 
-        $game_info = new GameInfo();
+        $game_info = GameInfo::get();
 
         $card = $game_info->get_ship_card($ship['shipCid']);
         if ($card === null) {
@@ -91,7 +101,7 @@ class PlayerInfo {
 
     public function get_target_ships() {
 
-        $game_info = new GameInfo();
+        $game_info = GameInfo::get();
 
         $list = [];
 
@@ -119,7 +129,7 @@ class PlayerInfo {
     }
 
     public function get_material_ships($cid = null) {
-        $game_info = new GameInfo();
+        $game_info = GameInfo::get();
 
         $list = [];
 

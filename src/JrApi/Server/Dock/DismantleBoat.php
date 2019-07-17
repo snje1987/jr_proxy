@@ -22,6 +22,10 @@ class DismantleBoat extends BaseJrApi {
 
         parent::after($response);
 
+        if ($this->uid === null) {
+            return;
+        }
+
         $body = $this->response->get_body();
 
         $str = zlib_decode($body);
@@ -37,7 +41,7 @@ class DismantleBoat extends BaseJrApi {
 
         $ids = $json['delShips'];
 
-        $player_info = new PlayerInfo();
+        $player_info = new PlayerInfo($this->uid);
         $player_info->del_ships($ids);
     }
 

@@ -7,6 +7,8 @@ use Exception;
 
 class Request extends Base {
 
+    public $ukey = null;
+
     public function __construct() {
         parent::__construct();
     }
@@ -97,6 +99,9 @@ class Request extends Base {
         foreach ($http_data['header'] as $k => $v) {
             if (strcasecmp($v, 'Connection: Keep-alive') == 0) {
                 $http_data['header'][$k] = 'Connection: close';
+            }
+            elseif (preg_match('/^Cookie:.*? hf_skey=([a-z0-9.]+);.*$/', $v, $matches)) {
+                $this->ukey = $matches[1];
             }
         }
 
