@@ -93,7 +93,7 @@ class BaseJrApi {
      */
     public function after($response) {
         $this->response = $response;
-        if (Config::get('debug', 'save_api_transmission', 0) != 1) {
+        if (Config::get('debug', 'save_api_transmission', 0) == 0) {
             return;
         }
 
@@ -105,7 +105,13 @@ class BaseJrApi {
         }
 
         $dir .= $api[0] . '/' . $api[1] . '/';
-        $file_name = $api[2];
+        $file_path = $dir . $api[2];
+
+        if (Config::get('debug', 'save_api_transmission', 0) == 1) {
+            if (file_exists($file_path . '.json')) {
+                return;
+            }
+        }
 
         if (!file_exists($dir)) {
             mkdir($dir, 0777, true);
@@ -117,7 +123,7 @@ class BaseJrApi {
 
         $header .= $this->response->get_header() . "\r\n";
 
-        file_put_contents($dir . $file_name . '.txt', $header);
+        file_put_contents($file_path . '.txt', $header);
 
         $body = $this->response->get_body();
 
@@ -129,7 +135,7 @@ class BaseJrApi {
 
         if ($json !== null) {
             $str = json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            file_put_contents($dir . $file_name . '.json', $str);
+            file_put_contents($file_path . '.json', $str);
         }
     }
 

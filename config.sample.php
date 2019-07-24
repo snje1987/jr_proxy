@@ -16,6 +16,6 @@ return [
         'port' => 14201,
     ],
     'debug' => [
-        'save_api_transmission' => 0, //是否记录api请求及返回结果
+        'save_api_transmission' => 0, //是否记录api请求及返回结果：0-不记录，1-记录新增的，2-记录所有
     ],
 ];
