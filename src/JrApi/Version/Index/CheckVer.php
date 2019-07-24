@@ -45,9 +45,15 @@ class CheckVer extends BaseJrApi {
             echo "反和谐开启成功\n";
         }
 
-        $data_version = isset($data['DataVersion']) ? strval($data['DataVersion']) : '';
-        if ($data_version !== '') {
-            GameInfo::get()->update_check($data_version);
+        if (isset($data['version']) && isset($data['version']['hasNewVersion']) && isset($data['version']['newVersionId'])) {
+            if ($data['version']['hasNewVersion'] == 0) {
+                $game_version = $data['version']['newVersionId'];
+                $data_version = isset($data['DataVersion']) ? strval($data['DataVersion']) : '';
+
+                if ($data_version !== '' && $game_version !== '') {
+                    GameInfo::get()->update_check($game_version, $data_version);
+                }
+            }
         }
 
         $json = json_encode($data);
