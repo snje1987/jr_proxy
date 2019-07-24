@@ -80,8 +80,11 @@ class ProxyServer {
 
         echo $info;
 
-        if (isset($client->api_obj)) {
-            $client->api_obj->after($response);
+        $response_http_data = $response->get_http_data();
+        if ($response_http_data['code'] == 200) {
+            if (isset($client->api_obj)) {
+                $client->api_obj->after($response);
+            }
         }
 
         $client->send($response->get_response());

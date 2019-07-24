@@ -137,7 +137,7 @@ abstract class Base {
             }
         }
         else {
-            throw new Exception('request error');
+            throw new Exception('request error: len => '.$data_len);
         }
         return false;
     }

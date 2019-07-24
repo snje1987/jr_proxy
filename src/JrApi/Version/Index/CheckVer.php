@@ -9,12 +9,6 @@ use App\Config;
 
 class CheckVer extends BaseJrApi {
 
-    protected static $fhx = 1;
-
-    public static function init_cfg() {
-        self::$fhx = \App\Config::get('main', 'fhx', 1);
-    }
-
     public function __construct($request) {
         parent::__construct($request);
     }

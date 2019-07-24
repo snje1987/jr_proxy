@@ -29,8 +29,14 @@ class BaseJrApi {
         elseif ($host === 'login.jr.moefantasy.com') {
             $top_name = 'login';
         }
+        elseif ($host === 'bshot.moefantasy.com') {
+            return ['version', 'res', 'download'];
+        }
         elseif (preg_match('/s[0-9]+\.jr\.moefantasy\.com/', $host)) {
             $top_name = 'server';
+        }
+        else {
+            return null;
         }
 
         if (preg_match('/^\/?(\w+)\/(\w+).*$/', $url, $matches)) {
@@ -49,12 +55,12 @@ class BaseJrApi {
     public static function create($request) {
         $http_data = $request->get_http_data();
 
-        $api_naem = self::get_api_name($http_data);
-        if ($api_naem === null) {
+        $api_name = self::get_api_name($http_data);
+        if ($api_name === null) {
             return null;
         }
 
-        $class_name = ucfirst($api_naem[0]) . '\\' . ucfirst($api_naem[1]) . '\\' . ucfirst($api_naem[2]);
+        $class_name = ucfirst($api_name[0]) . '\\' . ucfirst($api_name[1]) . '\\' . ucfirst($api_name[2]);
 
         $full_name = __NAMESPACE__ . '\\' . $class_name;
         if (class_exists($full_name)) {
