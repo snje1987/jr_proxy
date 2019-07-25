@@ -27,19 +27,25 @@ class Download extends BaseJrApi {
         $http_data = $this->request->get_http_data();
         $url = $http_data['url'];
 
+        $file_path = '';
+
         if (preg_match('/^\/(\w+)\/warshipgirlsr\.manifest\.gz\?v=(\w+)$/', $url, $matches)) {
             $top = $matches[1];
             $v = $matches[2];
 
-            $this->cache_file = self::CACHE_DIR . $top . '/warshipgirlsr.manifest.gz-' . $v;
-            echo $this->cache_file . "\n";
+            $file_path = $top . '/warshipgirlsr.manifest.gz-' . $v;
         }
         elseif (preg_match('/^\/([^?]+)\?md5=(\w+)$/', $url, $matches)) {
             $path = $matches[1];
             $md5 = $matches[2];
 
-            $this->cache_file = self::CACHE_DIR . $path . '-' . $md5;
+            $file_path = $path . '-' . $md5;
         }
+        else {
+            return;
+        }
+
+        $this->cache_file = self::CACHE_DIR . str_replace('..', '', $file_path);
 
         if (file_exists($this->cache_file) && filesize($this->cache_file) > 0) {
             $body = file_get_contents($this->cache_file);
