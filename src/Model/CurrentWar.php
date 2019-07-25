@@ -4,7 +4,8 @@ namespace App\Model;
 
 class CurrentWar {
 
-    const DEFAULT_WAR_LOG_PATH = '{data_dir}/war_log/{uid}/{type}/{year}{month}{day}_{hour}{min}{sec}_{map}';
+    const DEFAULT_WAR_LOG_PATH = '{uid}/{type}/{year}{month}{day}_{hour}{min}{sec}_{map}';
+    const BASE_DIR = APP_DATA_DIR . '/war_log/';
 
     protected $file;
     protected $war_spy;
@@ -117,7 +118,6 @@ class CurrentWar {
 
     protected function format_path() {
         $vars = [];
-        $vars['data_dir'] = APP_DATA_DIR;
         $vars['uid'] = $this->uid;
         $vars['type'] = $this->type;
         $vars['map'] = $this->name;
@@ -134,12 +134,13 @@ class CurrentWar {
         if ($tpl == '') {
             $tpl = self::DEFAULT_WAR_LOG_PATH;
         }
+        $tpl = trim($tpl, '\\\/');
 
         foreach ($vars as $name => $val) {
             $tpl = str_replace('{' . $name . '}', $val, $tpl);
         }
 
-        return $tpl . '.json';
+        return self::BASE_DIR . $tpl . '.json';
     }
 
 }
