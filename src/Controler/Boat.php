@@ -42,11 +42,6 @@ class Boat extends BaseControler {
 
     public function c_calc() {
         try {
-            $msg = [
-                'error' => 1,
-                'msg' => '操作失败',
-            ];
-
             $uid = isset($_POST['uid']) ? strval($_POST['uid']) : '';
             $target = isset($_POST['target']) ? strval($_POST['target']) : '';
             $material_cid = isset($_POST['material']) ? strval($_POST['material']) : '';
@@ -73,21 +68,24 @@ class Boat extends BaseControler {
             $calculator = new Calculator();
 
             $result = $calculator->cal($target_ship, $material_ships);
-
-            $msg = [
-                'error' => 0,
-                'result' => $result,
-            ];
         }
         catch (Exception $ex) {
-            $msg = [
-                'error' => 1,
-                'msg' => $ex->getMessage(),
-            ];
+            $result = false;
+            $msg = $ex->getMessage();
         }
 
-        $msg = json_encode($msg, JSON_UNESCAPED_UNICODE);
-        $this->router->send($msg);
+        if ($result === false) {
+            $this->display_tpl('msg_dlg', [
+                'title' => '发生错误',
+                'msg' => $msg,
+            ]);
+        }
+        else {
+            $this->display_tpl('ship/calc', [
+                'title' => '计算结果',
+                'result' => $result,
+            ]);
+        }
     }
 
 }

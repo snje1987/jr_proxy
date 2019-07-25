@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>强化计算</title>
-        <?php include __DIR__ . '/../inc/header.php' ?>
+        <?php include APP_TPL_DIR . '/inc/header.php' ?>
     </head>
     <body>
         <div class="container-fluid">
@@ -73,41 +73,46 @@
                 </div>
             </div>
             <div class="text-center" style="margin-top:20px">
-                <button class="btn btn-primary" id="calc">开始计算 [ 资源价值比 <?= $values[0] ?> / <?= $values[1] ?> / <?= $values[2] ?> / <?= $values[3] ?> ]</button>
+                <button class="btn btn-primary" id="calc" ohref="/boat/calc">开始计算 [ 资源价值比 <?= $values[0] ?> / <?= $values[1] ?> / <?= $values[2] ?> / <?= $values[3] ?> ]</button>
             </div>
             <div style="height:30px;"></div>
         </div>
-        <div id="result_dlg" class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">计算结果</h4>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-bordered table-hover table-condensed table-striped">
-                            <tbody id="result_table">
-
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php include __DIR__ . '/../inc/common.php' ?>
         <script type="text/javascript">
             (function ($) {
+                var get_data = function () {
+                    var target = $('input[name="target"]:checked').val();
+                    if (typeof target === 'undefined') {
+                        alert('必须选择强化目标');
+                        return null;
+                    }
+                    var material = [];
+                    var checks = $('input[name="material"]');
+                    for (var i = 0; i < checks.length; i++) {
+                        if (checks.eq(i).is(':checked')) {
+                            material[material.length] = checks.eq(i).val();
+                        }
+                    }
+
+                    if (material.length <= 0) {
+                        alert('必须选择强化素材');
+                        return null;
+                    }
+
+                    var data = {};
+                    data.target = target;
+                    data.material = JSON.stringify(material);
+                    data.uid = '<?= $cur_uid ?>';
+
+                    return data;
+                };
                 $(document).ready(function () {
-                    $('input[name="check_all"]').check_all({target: 'input[name="material"]'});
-                    $('#calc').calc({
-                        target: 'input[name="target"]',
-                        material: 'input[name="material"]',
-                        pop: '#result_dlg',
-                        table: '#result_table',
-                        uid: '<?= $cur_uid ?>'
+                    $('#calc').pop_btn({
+                        target: '#pop',
+                        data: get_data
                     });
+
+                    $('input[name="check_all"]').check_all({target: 'input[name="material"]'});
                     $('select[name="uid"]').change(function () {
                         location.href = '/boat/index?uid=' + $(this).val();
                     });
