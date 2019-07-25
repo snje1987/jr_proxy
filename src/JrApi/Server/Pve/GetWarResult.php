@@ -43,7 +43,7 @@ class GetWarResult extends BaseJrApi {
 
         if (Config::get('main', 'war_log', 0) == 1) {
             $current_war = new CurrentWar($this->uid);
-            $current_war->set_result($json)->save_to('pve');
+            $current_war->set_result($json)->save_log();
         }
 
         if (isset($json['newShipVO']) && isset($json['newShipVO'][0])) {

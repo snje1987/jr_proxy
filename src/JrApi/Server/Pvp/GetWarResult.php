@@ -45,7 +45,7 @@ class GetWarResult extends BaseJrApi {
         }
 
         $current_war = new CurrentWar($this->uid);
-        $current_war->set_result($json)->save_to('pvp');
+        $current_war->set_result($json)->save_log();
     }
 
 }

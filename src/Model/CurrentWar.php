@@ -4,8 +4,9 @@ namespace App\Model;
 
 class CurrentWar {
 
+    const DEFAULT_WAR_LOG_PATH = '{data_dir}/war_log/{uid}/{type}/{year}{month}{day}_{hour}{min}{sec}_{map}';
+
     protected $file;
-    protected $data_dir;
     protected $war_spy;
     protected $war_day;
     protected $war_result;
@@ -20,9 +21,8 @@ class CurrentWar {
         if (!file_exists($tmp_dir)) {
             mkdir($tmp_dir, 0777, true);
         }
-        
+
         $this->file = $tmp_dir . $this->uid . '.json';
-        $this->data_dir = APP_DATA_DIR . '/war_log/' . $this->uid . '/';
 
         $this->load();
     }
@@ -85,14 +85,13 @@ class CurrentWar {
         return $this;
     }
 
-    public function save_to($dir) {
-        $dir = $this->data_dir . trim($dir, '/\\') . '/';
+    public function save_log() {
+        $file = $this->format_path();
+        $dir = dirname($file);
 
         if (!file_exists($dir)) {
             mkdir($dir, 0777, true);
         }
-
-        $file = $dir . date('Ymd_His_') . $this->name . '.json';
 
         $data = [
             'type' => $this->type,
@@ -114,6 +113,33 @@ class CurrentWar {
         $this->save();
 
         return $this;
+    }
+
+    protected function format_path() {
+        $vars = [];
+        $vars['data_dir'] = APP_DATA_DIR;
+        $vars['uid'] = $this->uid;
+        $vars['type'] = $this->type;
+        $vars['map'] = $this->name;
+
+        $now = time();
+        $vars['year'] = date('Y', $now);
+        $vars['month'] = date('m', $now);
+        $vars['day'] = date('d', $now);
+        $vars['hour'] = date('H', $now);
+        $vars['min'] = date('i', $now);
+        $vars['sec'] = date('s', $now);
+
+        $tpl = \App\Config::get('main', 'war_log_path', '');
+        if ($tpl == '') {
+            $tpl = self::DEFAULT_WAR_LOG_PATH;
+        }
+
+        foreach ($vars as $name => $val) {
+            $tpl = str_replace('{' . $name . '}', $val, $tpl);
+        }
+
+        return $tpl . '.json';
     }
 
 }
