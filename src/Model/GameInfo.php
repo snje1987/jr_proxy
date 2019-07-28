@@ -327,6 +327,7 @@ class GameInfo {
             //'missleDefModulus' => 'missleDefModulus',
     ];
     const EQUIP_RANGE_NAME = [
+        0 => '未知',
         1 => '短',
         2 => '中',
         3 => '长',

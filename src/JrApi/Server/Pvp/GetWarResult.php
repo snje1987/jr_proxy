@@ -6,11 +6,44 @@ use App\Http;
 use App\JrApi\BaseJrApi;
 use App\Model\CurrentWar;
 use App\Config;
+use App\Model\WarReplayer;
 
 class GetWarResult extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
+    }
+
+    public function before() {
+        parent::before();
+
+        if (Config::get('main', 'war_replay', 0) != 1) {
+            return;
+        }
+
+        if ($this->uid === null) {
+            return;
+        }
+
+        $current_war = new CurrentWar($this->uid);
+
+        $type = $current_war->get_type();
+        if ($type == 'replay') {
+
+            $http_data = $this->request->get_http_data();
+            $url = $http_data['url'];
+
+            $prefix = '/pvp/getWarResult/1/';
+            if (strncmp($url, $prefix, strlen($prefix)) == 0) {
+                $extra = true;
+            }
+            else {
+                $extra = false;
+            }
+
+            $war_replayer = new WarReplayer($this->uid);
+            return $war_replayer->do_replay('result', $extra);
+        }
     }
 
     /**
@@ -22,7 +55,7 @@ class GetWarResult extends BaseJrApi {
     public function after($response) {
 
         parent::after($response);
-        
+
         if ($this->uid === null) {
             return;
         }

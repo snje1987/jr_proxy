@@ -77,4 +77,28 @@
             });
         });
     };
+    $.fn.ajax_link = function () {
+        $(this).click(function () {
+            var btn = $(this);
+            var href = btn.attr('ohref');
+            var question = btn.attr('question');
+
+            if (typeof question !== 'undefined' && question != '') {
+                if (!confirm(question)) {
+                    return;
+                }
+            }
+
+            $.get(href, null, null, 'json').done(function (data) {
+                if (data.msg) {
+                    alert(data.msg);
+                }
+                if (data.error == 0) {
+                    location.reload();
+                }
+            }).fail(function () {
+                alert('发生错误');
+            });
+        });
+    };
 })(jQuery);

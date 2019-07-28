@@ -116,6 +116,10 @@ class CurrentWar {
         return $this;
     }
 
+    public function get_type() {
+        return $this->type;
+    }
+
     protected function format_path() {
         $vars = [];
         $vars['uid'] = $this->uid;

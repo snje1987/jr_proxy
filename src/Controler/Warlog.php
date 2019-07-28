@@ -222,6 +222,45 @@ class Warlog extends BaseControler {
         ]);
     }
 
+    public function c_replay() {
+        $path = isset($_GET['p']) ? strval($_GET['p']) : '';
+
+        $path = ltrim(str_replace('..', '', $path), '\\\/');
+
+        $ret = [
+            'error' => -1,
+            'msg' => '发生错误',
+        ];
+
+        try {
+            if ($path == '') {
+                throw new Exception('必须指定文件');
+            }
+
+            $file = CurrentWar::BASE_DIR . $path;
+
+            if (!file_exists($file) || !is_file($file)) {
+                throw new Exception('文件不存在');
+            }
+
+            $json = file_get_contents($file);
+            file_put_contents(Model\WarReplayer::REPLAY_FILE, $json);
+
+            $ret = [
+                'error' => 0,
+                'msg' => '设置成功',
+            ];
+        }
+        catch (Exception $ex) {
+            $ret = [
+                'error' => -1,
+                'msg' => $ex->getMessage(),
+            ];
+        }
+
+        $this->router->send($ret);
+    }
+
     //////////////////////////
     const ATTACK_NAMES = [
         'open_missile_attack' => '开幕导弹',

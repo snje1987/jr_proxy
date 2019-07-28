@@ -30,6 +30,9 @@
                         </ol>
                     <?php } ?>
                     <?php if ($log !== false) { ?>
+                        <div style="margin-bottom:5px;">
+                            <a class="btn btn-primary ajax" ohref="/warlog/replay?p=<?= urlencode($cur_file) ?>">设置回放</a>
+                        </div>
                         <?php include APP_TPL_DIR . '/inc/warlog_detail.php' ?>
                     <?php } ?>
                 </div>

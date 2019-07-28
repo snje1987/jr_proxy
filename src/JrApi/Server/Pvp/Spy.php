@@ -6,11 +6,36 @@ use App\Http;
 use App\JrApi\BaseJrApi;
 use App\Config;
 use App\Model\CurrentWar;
+use App\Model\WarReplayer;
 
 class Spy extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
+    }
+
+    public function before() {
+        parent::before();
+
+        if (Config::get('main', 'war_replay', 0) != 1) {
+            return;
+        }
+
+        if ($this->uid === null) {
+            return;
+        }
+
+        $http_data = $this->request->get_http_data();
+        $url = $http_data['url'];
+
+        $prefix = '/pvp/spy/' . $this->uid . '/';
+        if (strncmp($url, $prefix, strlen($prefix)) == 0) {
+            $current_war = new CurrentWar($this->uid);
+            $current_war->set_type('replay')->save();
+
+            $war_replayer = new WarReplayer($this->uid);
+            return $war_replayer->do_replay('spy');
+        }
     }
 
     /**

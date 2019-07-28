@@ -8,6 +8,7 @@
     (function ($) {
         $(document).ready(function () {
             $('.pop_btn').pop_btn({target: '#pop'});
+            $('.ajax').ajax_link();
         });
     })(jQuery);
 </script>

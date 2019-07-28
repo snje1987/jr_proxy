@@ -45,6 +45,9 @@ class Router {
     }
 
     public function send($msg) {
+        if (is_array($msg)) {
+            $msg = json_encode($msg, JSON_UNESCAPED_UNICODE);
+        }
         $this->connection->send($msg);
     }
 
