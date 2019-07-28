@@ -18,6 +18,10 @@ use App\Controler\Warlog;
             <span class="btn btn-primary btn-xs">耐久</span>
             <span class="btn btn-info btn-xs" style="width:90px;text-align:right;color:black;"><?= $ship['hp'] ?>/<?= $ship['hpMax'] ?></span>
         </div>
+        <div class="btn-group" style="margin-bottom:3px;">
+            <span class="btn btn-primary btn-xs">射程</span>
+            <span class="btn btn-info btn-xs" style="width:90px;text-align:right;color:black;"><?= $ship['range'] ?></span>
+        </div>
         <br />
         <?php $col = 1; ?>
         <?php foreach (Warlog::SHIP_ATTR_NAME as $k => $v) { ?>
@@ -36,7 +40,7 @@ use App\Controler\Warlog;
                     </span>
                 </div>
             <?php } ?>
-            <?php if ($col ++ % 2 == 0) { ?>
+            <?php if ($col ++ % 3 == 0) { ?>
                 <br />
             <?php } ?>
         <?php } ?>
@@ -46,12 +50,12 @@ use App\Controler\Warlog;
             <span class="btn btn-primary btn-xs" title="<?= $v['desc'] ?>"><?= $v['title'] ?></span><br />
         <?php } ?>
     </td>
-    <td class="text-left">
+    <td class="text-center">
         <?php if ($ship['skill'] !== null) { ?>
             <span class="btn btn-primary btn-xs" title="<?= $ship['skill']['desc'] ?>"><?= $ship['skill']['title'] ?> Lv<?= $ship['skill']['level'] ?></span>
         <?php } ?>
     </td>
-    <td class="text-left">
+    <td class="text-center">
         <?php foreach ($ship['tactics'] as $v) { ?>
             <span class="btn btn-primary btn-xs" title="<?= $v['desc'] ?>"><?= $v['title'] ?> Lv<?= $v['level'] ?></span><br />
         <?php } ?>
