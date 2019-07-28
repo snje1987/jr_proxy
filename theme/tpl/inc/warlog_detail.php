@@ -45,8 +45,35 @@ use App\Controler\Warlog ?>
         <?php foreach ($log->buffs as $buff) { ?>
             <div style="margin-bottom:5px;"><?= Warlog::show_buff($buff) ?></div>
         <?php } ?>
+        <?php if (!empty($log->locked_ships)) { ?>
+            <div style="margin-bottom:5px;">
+                <p>被锁定船只</p>
+                <?php foreach ($log->locked_ships as $ship) { ?>
+                    <?= Warlog::show_ship($ship) ?>
+                <?php } ?>
+            </div>
+        <?php } ?>
     </div>
 </div>
+<?php if (!empty($log->support_attack)) { ?>
+    <div class="panel panel-primary">
+        <div class="panel-heading">支援攻击</div>
+        <div class="panel-body">
+            <?php
+            $info = $log->support_attack;
+            foreach ($info['attacks'] as $attack) {
+                ?>
+                <div style="margin-bottom:5px;"><?= Warlog::show_support_attack($attack) ?></div>
+            <?php } ?>
+            <?php if (!empty($info['die'])) { ?>
+                <p>击沉船只</p>
+                <?php foreach ($info['die'] as $ship) { ?>
+                    <?= Warlog::show_ship($ship) ?>
+                <?php } ?>
+            <?php } ?>
+        </div>
+    </div>
+<?php } ?>
 <?php if (!empty($log->open_air_attack)) { ?>
     <div class="panel panel-primary">
         <div class="panel-heading">航空战</div>

@@ -48,12 +48,12 @@ use App\Controler\Warlog;
     </td>
     <td class="text-left">
         <?php if ($ship['skill'] !== null) { ?>
-            <span class="btn btn-primary btn-xs" title="<?= $ship['skill']['desc'] ?>"><?= $ship['skill']['title'] ?>Lv<?= $ship['skill']['level'] ?></span>
+            <span class="btn btn-primary btn-xs" title="<?= $ship['skill']['desc'] ?>"><?= $ship['skill']['title'] ?> Lv<?= $ship['skill']['level'] ?></span>
         <?php } ?>
     </td>
     <td class="text-left">
         <?php foreach ($ship['tactics'] as $v) { ?>
-            <span class="btn btn-primary btn-xs" title="<?= $v['desc'] ?>"><?= $v['title'] ?>Lv<?= $v['level'] ?></span><br />
+            <span class="btn btn-primary btn-xs" title="<?= $v['desc'] ?>"><?= $v['title'] ?> Lv<?= $v['level'] ?></span><br />
         <?php } ?>
     </td>
 </tr>

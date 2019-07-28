@@ -120,7 +120,7 @@ class Warlog extends BaseControler {
                     $str .= '<span class="btn btn-info btn-xs" style="color:red;font-weight:bold;">伤害：' . $v['damage'] . ($v['ignore'] > 0 ? '(-' . $v['ignore'] . ')' : '') . '击穿';
                 }
                 else {
-                    $str .= '<span class="btn btn-info btn-xs" style="color:red;">伤害：' . $v['damage'] . ($v['ignore'] > 0 ? '(-' . $v['ignore'] . ')' : '');
+                    $str .= '<span class="btn btn-info btn-xs" style="color:red;">伤害：' . $v['damage'];
                 }
             }
 
@@ -129,8 +129,10 @@ class Warlog extends BaseControler {
         return $str;
     }
 
-    public static function show_attack($attack) {
-        $str = self::show_ship($attack['from']) . ' 目标 ';
+    public static function show_support_attack($attack) {
+        //$str = self::show_ship($attack['from']);
+
+        $str = '';
 
         foreach ($attack['attack'] as $v) {
             $str .= '<div class="btn-group btn-group-xs">' . self::show_ship($v['target'], false);
@@ -139,7 +141,31 @@ class Warlog extends BaseControler {
                 $str .= '<span class="btn btn-info btn-xs" style="color:red;font-weight:bold;">伤害：' . $v['damage'] . ($v['ignore'] > 0 ? '(-' . $v['ignore'] . ')' : '') . '击穿';
             }
             else {
-                $str .= '<span class="btn btn-info btn-xs" style="color:red;">伤害：' . $v['damage'] . ($v['ignore'] > 0 ? '(-' . $v['ignore'] . ')' : '');
+                $str .= '<span class="btn btn-info btn-xs" style="color:red;">伤害：' . $v['damage'];
+            }
+
+            $str .= '</span></div> ';
+        }
+        return $str;
+    }
+
+    public static function show_attack($attack) {
+        $str = self::show_ship($attack['from']);
+
+        if (!empty($attack['skill'])) {
+            $str .= ' 发动技能 <span class="btn btn-primary btn-xs" title="' . $attack['skill']['desc'] . '">' . $attack['skill']['title'] . ' Lv' . $attack['skill']['level'] . '</span>';
+        }
+
+        $str .= ' 目标 ';
+
+        foreach ($attack['attack'] as $v) {
+            $str .= '<div class="btn-group btn-group-xs">' . self::show_ship($v['target'], false);
+
+            if ($v['critical'] == 1) {
+                $str .= '<span class="btn btn-info btn-xs" style="color:red;font-weight:bold;">伤害：' . $v['damage'] . ($v['ignore'] > 0 ? '(-' . $v['ignore'] . ')' : '') . '击穿';
+            }
+            else {
+                $str .= '<span class="btn btn-info btn-xs" style="color:red;">伤害：' . $v['damage'];
             }
 
             $str .= '</span></div> ';
