@@ -5,6 +5,7 @@
         <?php include APP_TPL_DIR . '/inc/header.php' ?>
     </head>
     <body>
+        <?php include __DIR__ . '/../inc/common.php' ?>
         <div class="container-fluid">
             <div class="row">
                 <select name="uid">
@@ -77,7 +78,6 @@
             </div>
             <div style="height:30px;"></div>
         </div>
-        <?php include __DIR__ . '/../inc/common.php' ?>
         <script type="text/javascript">
             (function ($) {
                 var get_data = function () {

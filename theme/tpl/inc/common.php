@@ -11,3 +11,10 @@
         });
     })(jQuery);
 </script>
+<?php if (!empty($mbx)) { ?>
+    <ol class="breadcrumb">
+        <?php foreach ($mbx as $k => $v) { ?>
+            <li><a href="<?= $v == '' ? 'javascript:void(0);' : $v ?>"><?= $k ?></a></li>
+        <?php } ?>
+    </ol>
+<?php } ?>

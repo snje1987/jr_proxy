@@ -5,7 +5,7 @@ namespace App\Model;
 class CurrentWar {
 
     const DEFAULT_WAR_LOG_PATH = '{uid}/{type}/{year}{month}{day}_{hour}{min}{sec}_{map}';
-    const BASE_DIR = APP_DATA_DIR . '/war_log/';
+    const BASE_DIR = APP_DATA_DIR . '/warlog/';
 
     protected $file;
     protected $war_spy;

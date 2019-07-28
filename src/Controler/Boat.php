@@ -30,7 +30,12 @@ class Boat extends BaseControler {
         $values = \App\Config::get('main', 'values');
         $points = \App\Config::get('main', 'points');
 
+        $mbx = [
+            '首页' => '/',
+        ];
+
         $this->display_tpl('ship/index', [
+            'mbx' => $mbx,
             'material' => $material,
             'target' => $target,
             'values' => $values,

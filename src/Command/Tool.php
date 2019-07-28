@@ -59,9 +59,10 @@ class Tool extends BaseCommand {
     }
 
     public function cmd_download_game_info() {
-        $json = GameInfo::get_game_info();
+        $obj = GameInfo::get();
+        $json = $obj->get_game_info();
 
-        file_put_contents(APP_ROOT . '/tmp/raw_cart.json', json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        file_put_contents(APP_ROOT . '/tmp/raw_game_info.json', json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
 
 }
