@@ -39,18 +39,8 @@ class Lock extends BaseJrApi {
             return;
         }
 
-        $new_ship = $json['shipVO'];
-
-        $id = $new_ship['id'];
-        $ship = [
-            'title' => $new_ship['title'],
-            'shipCid' => $new_ship['shipCid'],
-            'isLocked' => $new_ship['isLocked'],
-            'strengthenAttribute' => $new_ship['strengthenAttribute'],
-        ];
-
         $player_info = new PlayerInfo($this->uid);
-        $player_info->set_ship($id, $ship);
+        $player_info->set_ship($json['shipVO'])->save();
     }
 
 }

@@ -41,20 +41,8 @@ class InitGame extends BaseJrApi {
 
         $ship_list = $json['userShipVO'];
 
-        $list = [];
-
-        foreach ($ship_list as $v) {
-            $id = $v['id'];
-            $list[$id] = [
-                'title' => $v['title'],
-                'shipCid' => $v['shipCid'],
-                'isLocked' => $v['isLocked'],
-                'strengthenAttribute' => $v['strengthenAttribute'],
-            ];
-        }
-
-        $player_info = new PlayerInfo($this->uid);
-        $player_info->set_all_ships($list);
+        $player_info = new PlayerInfo($this->uid, true);
+        $player_info->set_ships($ship_list)->save();
     }
 
 }

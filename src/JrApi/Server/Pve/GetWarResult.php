@@ -23,7 +23,7 @@ class GetWarResult extends BaseJrApi {
     public function after($response) {
 
         parent::after($response);
-        
+
         if ($this->uid === null) {
             return;
         }
@@ -46,19 +46,9 @@ class GetWarResult extends BaseJrApi {
             $current_war->set_result($json)->save_log();
         }
 
-        if (isset($json['newShipVO']) && isset($json['newShipVO'][0])) {
-            $new_ship = $json['newShipVO'][0];
-
-            $id = $new_ship['id'];
-            $ship = [
-                'title' => $new_ship['title'],
-                'shipCid' => $new_ship['shipCid'],
-                'isLocked' => $new_ship['isLocked'],
-                'strengthenAttribute' => $new_ship['strengthenAttribute'],
-            ];
-
+        if (isset($json['newShipVO'])) {
             $player_info = new PlayerInfo($this->uid);
-            $player_info->set_ship($id, $ship);
+            $player_info->set_ships($json['newShipVO'])->save();
         }
     }
 

@@ -35,24 +35,12 @@ class Evolution extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['shipVO']) || !isset($json['shipVO'][0])) {
+        if (!isset($json['shipVO'])) {
             return;
         }
 
-
-
-        $new_ship = $json['shipVO'][0];
-
-        $id = $new_ship['id'];
-        $ship = [
-            'title' => $new_ship['title'],
-            'shipCid' => $new_ship['shipCid'],
-            'isLocked' => $new_ship['isLocked'],
-            'strengthenAttribute' => $new_ship['strengthenAttribute'],
-        ];
-
         $player_info = new PlayerInfo($this->uid);
-        $player_info->set_ship($id, $ship);
+        $player_info->set_ships($json['shipVO'])->save();
     }
 
 }

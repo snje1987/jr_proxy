@@ -10,7 +10,7 @@ class PlayerInfo {
     protected $uid;
     protected $ship_list = [];
 
-    public function __construct($uid) {
+    public function __construct($uid, $noload = false) {
         $this->uid = $uid;
 
         if (!file_exists(self::DATA_DIR)) {
@@ -19,10 +19,13 @@ class PlayerInfo {
 
         $this->file = self::DATA_DIR . $this->uid . '.json';
 
-        $this->load_info();
+        if (!$noload) {
+            $this->load();
+        }
     }
 
-    public function save_info() {
+    public function save() {
+        ksort($this->ship_list);
         $data = [
             'ship_list' => $this->ship_list,
         ];
@@ -30,9 +33,11 @@ class PlayerInfo {
         $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
         file_put_contents($this->file, $json);
+
+        return $this;
     }
 
-    public function load_info() {
+    public function load() {
         if (file_exists($this->file)) {
             $json = file_get_contents($this->file);
             $data = json_decode($json, true);
@@ -42,22 +47,30 @@ class PlayerInfo {
         }
 
         $this->ship_list = isset($data['ship_list']) ? $data['ship_list'] : [];
+
+        return $this;
     }
 
-    public function set_all_ships($ship_list) {
-        ksort($ship_list);
-        $this->ship_list = $ship_list;
-        $this->save_info();
+    public function set_ships($list) {
+        foreach ($list as $v) {
+            $this->set_ship($v);
+        }
+        return $this;
     }
 
-    public function get_all_ships() {
-        return $this->ship_list;
-    }
-
-    public function set_ship($id, $ship) {
+    public function set_ship($info) {
+        $id = $info['id'];
+        $ship = [
+            'id' => $id,
+            'title' => $info['title'],
+            'cid' => $info['shipCid'],
+            'isLocked' => $info['isLocked'],
+            'strengthenAttribute' => $info['strengthenAttribute'],
+            'equipment' => $info['equipment'],
+        ];
         $this->ship_list[$id] = $ship;
 
-        $this->save_info();
+        return $this;
     }
 
     public function del_ships($ids) {
@@ -66,7 +79,8 @@ class PlayerInfo {
                 unset($this->ship_list[$id]);
             }
         }
-        $this->save_info();
+
+        return $this;
     }
 
     public function get_target_ship($id) {
