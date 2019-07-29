@@ -42,7 +42,17 @@ class InitGame extends BaseJrApi {
         $ship_list = $json['userShipVO'];
 
         $player_info = new PlayerInfo($this->uid, true);
-        $player_info->set_ships($ship_list)->save();
+        $player_info->set_ships($ship_list);
+
+        if (isset($json['tactics'])) {
+            $player_info->set_tactics($json['tactics']);
+        }
+
+        if (isset($json['fleetVo'])) {
+            $player_info->set_fleet($json['fleetVo']);
+        }
+
+        $player_info->save();
     }
 
 }

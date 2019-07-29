@@ -5,11 +5,11 @@
         <?php include APP_TPL_DIR . '/inc/header.php' ?>
     </head>
     <body>
+        <?php $cur_tab = '/'; ?>
+        <?php include APP_TPL_DIR . '/inc/common.php' ?>
         <div class="container-fluid" style="margin-top:20px;">
             <p>全局代理端口：http://[本机局域网IP]:<?= $proxy_port ?></p>
             <p>自动代理路径：http://[本机脑局域网IP]:<?= $web_port ?>/proxy</p>
-            <p><a href="/boat/index">强化计算器</a></p>
-            <p><a href="/warlog/index">战斗记录</a></p>
         </div>
     </body>
 </html>

@@ -5,7 +5,8 @@
         <?php include APP_TPL_DIR . '/inc/header.php' ?>
     </head>
     <body>
-        <?php include __DIR__ . '/../inc/common.php' ?>
+        <?php $cur_tab = '/warlog/index'; ?>
+        <?php include APP_TPL_DIR . '/inc/common.php' ?>
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-3 col-xs-2">

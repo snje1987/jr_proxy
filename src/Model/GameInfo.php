@@ -165,6 +165,7 @@ class GameInfo {
                 'title' => $ship['title'],
                 'shipIndex' => $ship['shipIndex'], //图鉴编号
                 'evoClass' => $ship['evoClass'], //改造
+                'country' => $ship['country'], //国籍
                 'dismantle' => $ship['dismantle'], //拆解
                 'strengthenTop' => $ship['strengthenTop'], //强化满的消耗
                 'strengthenLevelUpExp' => $ship['strengthenLevelUpExp'], //每级花费点数

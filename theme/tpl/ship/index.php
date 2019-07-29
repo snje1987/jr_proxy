@@ -5,7 +5,8 @@
         <?php include APP_TPL_DIR . '/inc/header.php' ?>
     </head>
     <body>
-        <?php include __DIR__ . '/../inc/common.php' ?>
+        <?php $cur_tab = '/ship/index'; ?>
+        <?php include APP_TPL_DIR . '/inc/common.php' ?>
         <div class="container-fluid">
             <div class="row">
                 <select name="uid">
@@ -74,7 +75,7 @@
                 </div>
             </div>
             <div class="text-center" style="margin-top:20px">
-                <button class="btn btn-primary" id="calc" ohref="/boat/calc">开始计算 [ 资源价值比 <?= $values[0] ?> / <?= $values[1] ?> / <?= $values[2] ?> / <?= $values[3] ?> ]</button>
+                <button class="btn btn-primary" id="calc" ohref="/ship/calc">开始计算 [ 资源价值比 <?= $values[0] ?> / <?= $values[1] ?> / <?= $values[2] ?> / <?= $values[3] ?> ]</button>
             </div>
             <div style="height:30px;"></div>
         </div>
@@ -114,7 +115,7 @@
 
                     $('input[name="check_all"]').check_all({target: 'input[name="material"]'});
                     $('select[name="uid"]').change(function () {
-                        location.href = '/boat/index?uid=' + $(this).val();
+                        location.href = '/ship/index?uid=' + $(this).val();
                     });
                 });
             })(jQuery);

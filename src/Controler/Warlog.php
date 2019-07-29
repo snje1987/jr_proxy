@@ -101,12 +101,7 @@ class Warlog extends BaseControler {
             $log = false;
         }
 
-        $mbx = [
-            '首页' => '/',
-        ];
-
         $this->display_tpl('warlog/index', [
-            'mbx' => $mbx,
             'dir_list' => $dir_list,
             'file_list' => $file_list,
             'cur_file' => $cur_file,

@@ -6,7 +6,7 @@ use App\Model\PlayerInfo;
 use App\Model\Calculator;
 use Exception;
 
-class Boat extends BaseControler {
+class Ship extends BaseControler {
 
     public function __construct($router) {
         parent::__construct($router);
@@ -18,7 +18,7 @@ class Boat extends BaseControler {
         $uid_list = \App\Model\LoginInfo::get()->get_all_uids();
         if ($cur_uid == '') {
             $cur_uid = current($uid_list);
-            $this->router->redirect('/boat/index?uid=' . $cur_uid);
+            $this->router->redirect('/ship/index?uid=' . $cur_uid);
             return;
         }
 
@@ -30,12 +30,7 @@ class Boat extends BaseControler {
         $values = \App\Config::get('main', 'values');
         $points = \App\Config::get('main', 'points');
 
-        $mbx = [
-            '首页' => '/',
-        ];
-
         $this->display_tpl('ship/index', [
-            'mbx' => $mbx,
             'material' => $material,
             'target' => $target,
             'values' => $values,
@@ -91,6 +86,42 @@ class Boat extends BaseControler {
                 'result' => $result,
             ]);
         }
+    }
+
+    public function c_fleet() {
+        $cur_uid = isset($_GET['uid']) ? strval($_GET['uid']) : '';
+
+        $uid_list = \App\Model\LoginInfo::get()->get_all_uids();
+        if ($cur_uid == '') {
+            $cur_uid = current($uid_list);
+            $this->router->redirect('/ship/fleet?uid=' . $cur_uid);
+            return;
+        }
+
+        $cur_fleet = isset($_GET['fleet']) ? intval($_GET['fleet']) : 0;
+
+        $play_info = new PlayerInfo($cur_uid);
+
+        $fleet_list = $play_info->get_fleet_list();
+
+        $ship_list = [];
+
+        if ($cur_fleet > 0) {
+            $fleet_info = $play_info->get_fleet($cur_fleet);
+            if ($fleet_info !== null) {
+                foreach ($fleet_info['ships'] as $id) {
+                    $ship_list[] = $play_info->get_ship_info($id);
+                }
+            }
+        }
+
+        $this->display_tpl('ship/fleet', [
+            'cur_fleet' => $cur_fleet,
+            'fleet_list' => $fleet_list,
+            'uid_list' => $uid_list,
+            'cur_uid' => $cur_uid,
+            'ship_list' => $ship_list,
+        ]);
     }
 
 }

@@ -12,10 +12,9 @@
         });
     })(jQuery);
 </script>
-<?php if (!empty($mbx)) { ?>
-    <ol class="breadcrumb">
-        <?php foreach ($mbx as $k => $v) { ?>
-            <li><a href="<?= $v == '' ? 'javascript:void(0);' : $v ?>"><?= $k ?></a></li>
-        <?php } ?>
-    </ol>
-<?php } ?>
+<ul class="nav nav-tabs" style="margin-bottom:20px;">
+    <li<?= $cur_tab == '/' ? ' class="active"' : '' ?>><a href="/">首页</a></li>
+    <li<?= $cur_tab == '/ship/index' ? ' class="active"' : '' ?>><a href="/ship/index?uid=<?= isset($_GET['uid']) ? $_GET['uid'] : '' ?>">强化计算器</a></li>
+    <li<?= $cur_tab == '/warlog/index' ? ' class="active"' : '' ?>><a href="/warlog/index">战斗记录</a></li>
+    <li<?= $cur_tab == '/ship/fleet' ? ' class="active"' : '' ?>><a href="/ship/fleet?uid=<?= isset($_GET['uid']) ? $_GET['uid'] : '' ?>">编队辅助</a></li>
+</ul>

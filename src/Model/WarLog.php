@@ -484,16 +484,16 @@ class WarLog {
 
         foreach ($list as $info) {
             $ship = [];
-            
+
             $ship_card = $this->game_info->get_ship_card($info['shipCid']);
-            
-            if($this->cfg_show_card_name){
+
+            if ($this->cfg_show_card_name) {
                 $ship['title'] = $ship_card['title'];
             }
             else {
                 $ship['title'] = $info['title'];
             }
-            
+
             $ship['level'] = $info['level'];
 
             if ($ship_card !== null) {
@@ -598,7 +598,5 @@ class WarLog {
         'airDef' => '对空',
         'speed' => '航速',
     ];
-    ///
-    const ATTACKTYPE_MISSILE = 7;
 
 }
