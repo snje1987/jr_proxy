@@ -64,6 +64,8 @@ class PlayerInfo {
             }
             $this->tactics_list[$v['boat_id']][$v['tactics_id']] = $v['cid'];
         }
+        
+        return $this;
     }
 
     public function set_fleet($list) {
@@ -74,6 +76,8 @@ class PlayerInfo {
                 'ships' => $v['ships'],
             ];
         }
+        
+        return $this;
     }
 
     public function set_ships($list) {

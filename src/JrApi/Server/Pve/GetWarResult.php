@@ -46,10 +46,21 @@ class GetWarResult extends BaseJrApi {
             $current_war->set_result($json)->save_log();
         }
 
+        $player_info = new PlayerInfo($this->uid);
+
         if (isset($json['newShipVO'])) {
-            $player_info = new PlayerInfo($this->uid);
-            $player_info->set_ships($json['newShipVO'])->save();
+            $player_info->set_ships($json['newShipVO']);
         }
+
+        if (isset($json['shipTactics'])) {
+            $player_info->set_tactics($json['shipTactics']);
+        }
+        
+        if(isset($json['shipVO'])){
+            $player_info->set_ships($json['shipVO']);
+        }
+
+        $player_info->save();
     }
 
 }

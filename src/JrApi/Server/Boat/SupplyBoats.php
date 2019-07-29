@@ -1,33 +1,22 @@
 <?php
 
-namespace App\JrApi\Server\Campaign;
+namespace App\JrApi\Server\Boat;
 
 use App\Http;
 use App\JrApi\BaseJrApi;
-use App\Model\CurrentWar;
-use App\Config;
+use App\Model\PlayerInfo;
 
-class GetWarResult extends BaseJrApi {
+class SupplyBoats extends BaseJrApi {
 
     public function __construct($request) {
         parent::__construct($request);
     }
 
-    /**
-     * 收到响应后执行
-     * 
-     * @param Http\Response $response
-     * @return Http\Response
-     */
     public function after($response) {
 
         parent::after($response);
 
         if ($this->uid === null) {
-            return;
-        }
-
-        if (Config::get('main', 'war_log', 0) != 1) {
             return;
         }
 
@@ -40,15 +29,14 @@ class GetWarResult extends BaseJrApi {
             return;
         }
 
-        if (isset($json['warResult'])) {
-            $current_war = new CurrentWar($this->uid);
-            $current_war->set_result($json)->save_log();
+        if (!isset($json['shipVO']) && !isset($json['tactics'])) {
+            return;
         }
 
         $player_info = new PlayerInfo($this->uid);
 
-        if (isset($json['shipTactics'])) {
-            $player_info->set_tactics($json['shipTactics']);
+        if (isset($json['tactics'])) {
+            $player_info->set_tactics($json['tactics']);
         }
 
         if (isset($json['shipVO'])) {

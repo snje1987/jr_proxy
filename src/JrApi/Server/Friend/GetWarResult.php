@@ -40,12 +40,15 @@ class GetWarResult extends BaseJrApi {
             return;
         }
 
-        if (!isset($json['warResult'])) {
-            return;
+        if (isset($json['warResult'])) {
+            $current_war = new CurrentWar($this->uid);
+            $current_war->set_result($json)->save_log();
         }
 
-        $current_war = new CurrentWar($this->uid);
-        $current_war->set_result($json)->save_log();
+        if (isset($json['shipVO'])) {
+            $player_info = new \App\Model\PlayerInfo($this->uid);
+            $player_info->set_ships($json['shipVO'])->save();
+        }
     }
 
 }
