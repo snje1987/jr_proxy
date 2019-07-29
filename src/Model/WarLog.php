@@ -52,6 +52,202 @@ class WarLog {
         }
     }
 
+    public function show_support_attack() {
+        $htmls = [];
+        foreach ($this->support_attack as $attack) {
+            $str = '';
+
+            foreach ($attack['attack'] as $damage) {
+                $str .= $this->show_damage($damage);
+                $str .= ' 目标 ' . $this->attack_ship($damage['target'], $damage['damage']);
+
+                $str .= '<br />';
+            }
+
+            $htmls[] = '<div style="margin-bottom:5px;">' . $str . '</div>';
+        }
+
+        return implode('', $htmls);
+    }
+
+    public function show_open_air_attack() {
+        $htmls = [];
+        foreach ($this->open_air_attack as $attack) {
+
+            $str = self::show_ship($attack['from']) . ' 发动空袭<br />';
+
+            foreach ($attack['attack'] as $damage) {
+
+                $str .= $this->show_drop($damage) . ' ';
+                $str .= $this->show_damage($damage);
+                $str .= ' 目标 ' . $this->attack_ship($damage['target'], $damage['damage']);
+
+                $str .= '<br />';
+            }
+
+            $str .= '<br />';
+
+            $htmls[] = '<div style="margin-bottom:5px;">' . $str . '</div>';
+        }
+
+        return implode('', $htmls);
+    }
+
+    public function show_attack($name) {
+        $htmls = [];
+
+        if (!isset($this->{$name})) {
+            return '';
+        }
+
+        foreach ($this->{$name} as $attack) {
+
+            $str = self::show_ship($attack['from']);
+
+            if (!empty($attack['skill'])) {
+                $str .= ' 发动技能 ' . $this->show_skill($attack['skill']);
+            }
+
+            $str .= ' 进行攻击<br />';
+
+            foreach ($attack['attack'] as $damage) {
+
+                $str .= $this->show_damage($damage);
+                $str .= ' 目标 ';
+
+                if (!empty($damage['helper'])) {
+                    $str .= $this->show_ship($damage['target']) . ' 被代替 ' . $this->attack_ship($damage['helper'], $damage['damage']);
+                }
+                elseif (!empty($damage['defencer'])) {
+                    $str .= $this->show_ship($damage['target']) . ' 被拦截 ' . $this->attack_ship($damage['defencer'], $damage['damage']);
+                }
+                else {
+                    $str .= $this->attack_ship($damage['target'], $damage['damage']);
+                }
+
+                $str .= '<br />';
+            }
+
+            $str .= '<br />';
+
+            $htmls[] = '<div style="margin-bottom:5px;">' . $str . '</div>';
+        }
+
+        return implode('', $htmls);
+    }
+
+    public function show_buffs() {
+        $htmls = [];
+
+        foreach ($this->buffs as $buff) {
+            $from = $buff['from'];
+            if ($from[0] == 1) {
+                $class = 'success';
+            }
+            else {
+                $class = 'danger';
+            }
+
+            $str = '<span class="btn btn-' . $class . ' btn-xs" title="' . $buff['desc'] . '">' . $buff['title'] . '</span> 来自 ';
+
+            $str .= self::show_ship($from);
+
+            $str .= ' 作用于 <br />';
+
+            foreach ($buff['to'] as $v) {
+                $str .= ' ' . self::show_ship($v);
+            }
+            $str .= '<br /><br />';
+
+            $htmls[] = '<div style="margin-bottom:5px;">' . $str . '</div>';
+        }
+
+        return implode('', $htmls);
+    }
+
+    public function show_damage($damage) {
+        if ($damage['critical'] == 1) {
+            $flag = '击穿';
+            $style = 'color:red;font-weight:bold;';
+        }
+        else {
+            $flag = '伤害';
+            $style = 'color:black;';
+        }
+
+        $str = '<span class="btn btn-primary">' . $flag . '</span><span class="btn btn-info" style="' . $style . 'min-width:50px;text-align:right;">' . $damage['damage'] . $damage['extra'] . '</span>';
+
+        return '<div class="btn-group btn-group-xs">' . $str . '</div>';
+    }
+
+    public function show_drop($damage) {
+        $str = '<span class="btn btn-primary">击坠</span>';
+
+        $str .= '<span class="btn btn-info" style="color:black;">' . $damage['drop'] . '/' . $damage['amount'] . '</span>';
+
+        return '<div class="btn-group btn-group-xs">' . $str . '</div>';
+    }
+
+    public function show_ship($ship) {
+        if ($ship[0] == 1) {
+            $class = 'success';
+            $list = $this->self_ships;
+        }
+        else {
+            $class = 'danger';
+            $list = $this->enemy_ships;
+        }
+
+        $ship_info = $list[$ship[1]];
+
+        $str = '<span class="btn btn-primary">' . $ship[1] . '</span><span class="btn btn-' . $class . '" btn-xs>' . $ship_info['title'] . '</span>';
+
+        if ($ship_info['hp_left'] > 0) {
+            $str .= '<span class="btn btn-info" style="color:black;min-width:70px;text-align:right;">' . $ship_info['hp_left'] . '/' . $ship_info['hpMax'] . '</span>';
+        }
+        else {
+            $str .= '<span class="btn btn-warning" style="color:black;min-width:70px;text-align:center;">击沉</span>';
+        }
+
+        return '<div class="btn-group btn-group-xs">' . $str . '</div>';
+    }
+
+    public function show_skill($skill) {
+        return '<span class="btn btn-primary btn-xs" title="' . $skill['desc'] . '">' . $skill['title'] . ' Lv' . $skill['level'] . '</span>';
+    }
+
+    public function attack_ship($ship, $damage) {
+        $str = $this->show_ship($ship);
+
+        if ($damage == 0) {
+            return $str;
+        }
+
+        if ($ship[0] == 1) {
+            $list = &$this->self_ships;
+        }
+        else {
+            $list = &$this->enemy_ships;
+        }
+
+        $ship_info = $list[$ship[1]];
+
+        if ($ship_info['hp_left'] <= 0) {
+            return $str;
+        }
+
+        $ship_info['hp_left'] -= $damage;
+        if ($ship_info['hp_left'] < 0) {
+            $ship_info['hp_left'] = 0;
+        }
+
+        $list[$ship[1]] = $ship_info;
+
+        $str .= ' <span class="glyphicon glyphicon-arrow-right"></span> ' . $this->show_ship($ship);
+
+        return $str;
+    }
+
     /////////////////////////////////////////////
 
     protected $raw_data = null;
@@ -131,24 +327,18 @@ class WarLog {
     }
 
     protected function get_attacks($list) {
-        $attacks = [];
-        $die = [];
-
         foreach ($list as $v) {
-            $this->add_one_attack($v, $attacks, $die);
+            $this->add_one_attack($v, $attacks);
         }
 
         if (empty($attacks)) {
             return [];
         }
 
-        return [
-            'attacks' => $attacks,
-            'die' => $die,
-        ];
+        return $attacks;
     }
 
-    protected function add_one_attack($info, &$attacks, &$die) {
+    protected function add_one_attack($info, &$attacks) {
         $from = $info['fromIndex'];
 
         if ($info['attackSide'] == 1) {
@@ -180,46 +370,53 @@ class WarLog {
             $damage = $info['damages'][$k];
 
             $amount = $damage['amount'];
-            $true_damage = $amount;
-            if ($damage['extraDef'] > 0) {
-                $true_damage = $amount - $damage['extraDef'];
-                $amount .= '(-' . $damage['extraDef'] . ')';
+            $extra = [];
+            if ($damage['extraDef'] != 0) {
+                $amount = $amount - $damage['extraDef'];
+                $extra[] = '-' . $damage['extraDef'];
+            }
+            if (isset($damage['extraHurt']) && $damage['extraHurt'] != 0) {
+                $amount = $amount + $damage['extraHurt'];
+                $extra[] = '+' . $damage['extraDef'];
+            }
+
+            if (!empty($extra)) {
+                $extra_str = '(' . implode('', $extra) . ')';
+            }
+            else {
+                $extra_str = '';
+            }
+
+            $defencer = [];
+            $helper = [];
+            if (!empty($info['tmdDef'])) {
+                $defencer_index = $info['tmdDef'][0];
+                $defencer = $this->{'get_' . $enemy_ship . '_name'}($defencer_index);
+            }
+            elseif ($damage['extraDefHelper'] >= 0 && $damage['defType'] == 0) {
+                $helper_index = $damage['extraDefHelper'];
+                $helper = $this->{'get_' . $enemy_ship . '_name'}($helper_index);
             }
 
             $attack = [
                 'damage' => $amount,
+                'extra' => $extra_str,
                 'critical' => $damage['isCritical'],
                 'amount' => $info['planeAmount'],
                 'drop' => $info['dropAmount'],
-                'ignore' => $info['ignoreDamage'],
                 'plane_type' => $info['planeType'],
+                'defencer' => $defencer,
+                'helper' => $helper,
             ];
             $attack['target'] = $this->{'get_' . $enemy_ship . '_name'}($target);
 
+            $true_target = $attack['target'];
+            if (!empty($attack['helper'])) {
+                $true_target = $attack['helper'];
+            }
+
             $attacks[$prefix . $from]['attack'][] = $attack;
-
-            if ($attack['damage'] != 0) {
-                $new_die = $this->update_ship_hp($true_damage, $attack['target'], $enemy_ship . 's');
-                if ($new_die !== null) {
-                    $die[] = $new_die;
-                }
-            }
         }
-    }
-
-    protected function update_ship_hp($damage, $target, $array_name) {
-        $index = $target[1];
-
-        if (!isset($this->{$array_name}[$index]['hp_left'])) {
-            $this->{$array_name}[$index]['hp_left'] = $this->{$array_name}[$index]['hp'];
-        }
-        if ($this->{$array_name}[$index]['hp_left'] > 0) {
-            $this->{$array_name}[$index]['hp_left'] -= $damage;
-            if ($this->{$array_name}[$index]['hp_left'] <= 0) {
-                return $target;
-            }
-        }
-        return null;
     }
 
     protected function get_buff_info($list, $type) {
@@ -270,14 +467,14 @@ class WarLog {
 
     protected function get_self_ship_name($index) {
         if (isset($this->self_ships[$index])) {
-            return [1, $index, $this->self_ships[$index]['title']];
+            return [1, $index];
         }
         return null;
     }
 
     protected function get_enemy_ship_name($index) {
         if (isset($this->enemy_ships[$index])) {
-            return [2, $index, $this->enemy_ships[$index]['title']];
+            return [2, $index];
         }
         return null;
     }
@@ -306,6 +503,8 @@ class WarLog {
                     $ship[$k] = $info[$k];
                 }
             }
+
+            $ship['hp_left'] = $ship['hp'];
 
             $ship['range'] = GameInfo::EQUIP_RANGE_NAME[$info['range']];
 
@@ -391,5 +590,7 @@ class WarLog {
         'airDef' => '对空',
         'speed' => '航速',
     ];
+    ///
+    const ATTACKTYPE_MISSILE = 7;
 
 }

@@ -12,7 +12,7 @@ class Resource extends BaseControler {
 
     public function dispatch($nouse) {
         $uri = isset($_SERVER['REQUEST_URI']) ? strval($_SERVER['REQUEST_URI']) : '';
-        $pos = strpos($uri, '?');
+        $pos = strpos($uri, '/', 1);
         if ($pos !== false) {
             $file = substr($uri, $pos + 1);
         }

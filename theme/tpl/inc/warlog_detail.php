@@ -46,14 +46,12 @@ use App\Controler\Warlog ?>
             <?php } ?>
             <span class="btn btn-primary" title="<?= $log->war_type['desc'] ?>"><?= $log->war_type['title'] ?></span>
         </div>
-        <?php foreach ($log->buffs as $buff) { ?>
-            <div style="margin-bottom:5px;"><?= Warlog::show_buff($buff) ?></div>
-        <?php } ?>
+        <?= $log->show_buffs() ?>
         <?php if (!empty($log->locked_ships)) { ?>
             <div style="margin-bottom:5px;">
                 <p>被锁定船只</p>
                 <?php foreach ($log->locked_ships as $ship) { ?>
-                    <?= Warlog::show_ship($ship) ?>
+                    <?= $log->show_ship($ship) ?>
                 <?php } ?>
             </div>
         <?php } ?>
@@ -63,18 +61,7 @@ use App\Controler\Warlog ?>
     <div class="panel panel-primary">
         <div class="panel-heading">支援攻击</div>
         <div class="panel-body">
-            <?php
-            $info = $log->support_attack;
-            foreach ($info['attacks'] as $attack) {
-                ?>
-                <div style="margin-bottom:5px;"><?= Warlog::show_support_attack($attack) ?></div>
-            <?php } ?>
-            <?php if (!empty($info['die'])) { ?>
-                <p>击沉船只</p>
-                <?php foreach ($info['die'] as $ship) { ?>
-                    <?= Warlog::show_ship($ship) ?>
-                <?php } ?>
-            <?php } ?>
+            <?= $log->show_support_attack() ?>
         </div>
     </div>
 <?php } ?>
@@ -87,21 +74,7 @@ use App\Controler\Warlog ?>
                     <span class="btn btn-primary" title="<?= $log->air_control['desc'] ?>"><?= $log->air_control['title'] ?></span>
                 </div>
             <?php } ?>
-            <?php
-            $info = $log->open_air_attack;
-            foreach ($info['attacks'] as $attack) {
-                ?>
-                <div style="margin-bottom:5px;">
-                    <?= Warlog::show_open_air_attack($attack) ?>
-                    <br /><br />
-                </div>
-            <?php } ?>
-            <?php if (!empty($info['die'])) { ?>
-                <p>击沉船只</p>
-                <?php foreach ($info['die'] as $ship) { ?>
-                    <?= Warlog::show_ship($ship) ?>
-                <?php } ?>
-            <?php } ?>
+            <?= $log->show_open_air_attack() ?>
         </div>
     </div>
 <?php } ?>
@@ -110,18 +83,7 @@ use App\Controler\Warlog ?>
         <div class="panel panel-primary">
             <div class="panel-heading"><?= $name ?></div>
             <div class="panel-body">
-                <?php
-                $info = $log->{$key};
-                foreach ($info['attacks'] as $attack) {
-                    ?>
-                    <div style="margin-bottom:5px;"><?= Warlog::show_attack($attack) ?></div>
-                <?php } ?>
-                <?php if (!empty($info['die'])) { ?>
-                    <p>击沉船只</p>
-                    <?php foreach ($info['die'] as $ship) { ?>
-                        <?= Warlog::show_ship($ship) ?>
-                    <?php } ?>
-                <?php } ?>
+                <?= $log->show_attack($key) ?>
             </div>
         </div>
     <?php } ?>
