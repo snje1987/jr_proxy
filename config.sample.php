@@ -8,6 +8,7 @@ return [
         'points' => [0, 0, 0, 0], //强化属性价值，火雷甲空，越大价值越高，计算时会额外附加到拆解价值上，不能小于0
         'war_log' => 0, //是否记录战斗数据，1为开启，0为不开启
         'war_log_path' => '{uid}/{type}/{year}{month}{day}_{hour}{min}{sec}_{map}', //战斗记录保存路径，不要包含中文，可用变量：{uid} {type} {year} {month} {day} {hour} {min} {sec} {map}
+        'show_card_name' => 1, //战斗记录中显示图鉴名称
         'war_replay' => 0, //是否开启战斗回放功能，1为开启，0为不开启
     ],
     'web_server' => [//Web服务器设置

@@ -26,9 +26,13 @@ class WarLog {
     public $close_missile_attack = [];
     public $night_attack = [];
     public $locked_ships = [];
+    ///////////////////
+
+    protected $cfg_show_card_name = 1;
 
     public function __construct() {
         $this->game_info = GameInfo::get();
+        $this->cfg_show_card_name = \App\Config::get('main', 'show_card_name', 1);
     }
 
     public function init($file) {
@@ -375,10 +379,6 @@ class WarLog {
                 $amount = $amount - $damage['extraDef'];
                 $extra[] = '-' . $damage['extraDef'];
             }
-            if (isset($damage['extraHurt']) && $damage['extraHurt'] != 0) {
-                $amount = $amount + $damage['extraHurt'];
-                $extra[] = '+' . $damage['extraDef'];
-            }
 
             if (!empty($extra)) {
                 $extra_str = '(' . implode('', $extra) . ')';
@@ -484,10 +484,18 @@ class WarLog {
 
         foreach ($list as $info) {
             $ship = [];
-            $ship['title'] = $info['title'];
+            
+            $ship_card = $this->game_info->get_ship_card($info['shipCid']);
+            
+            if($this->cfg_show_card_name){
+                $ship['title'] = $ship_card['title'];
+            }
+            else {
+                $ship['title'] = $info['title'];
+            }
+            
             $ship['level'] = $info['level'];
 
-            $ship_card = $this->game_info->get_ship_card($info['shipCid']);
             if ($ship_card !== null) {
                 $ship['desc'] = $ship_card['shipIndex'] . '-' . $ship_card['title'];
                 if ($ship_card['evoClass'] > 0) {
