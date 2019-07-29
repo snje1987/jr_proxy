@@ -2,7 +2,7 @@
 
 namespace App\Controler;
 
-use Workerman\Protocols\Http;
+use Exception;
 
 abstract class BaseControler {
 
@@ -27,13 +27,22 @@ abstract class BaseControler {
         $function_name = 'c_' . $function_name;
 
         if (!method_exists($this, $function_name)) {
-            return $this->router->show_404();
+            $this->show_404();
         }
         call_user_func([$this, $function_name]);
     }
 
-    public function send($msg) {
-        $this->router->send($msg);
+    public function header($header, $replace = true, $code = 0) {
+        return $this->router->header($header, $replace, $code);
+    }
+
+    public function show_404() {
+        $this->header('Content-type:text/plain', true, 404);
+        throw new Exception('Page Not Found');
+    }
+
+    public function log($str) {
+        fwrite(STDERR, $str . "\n");
     }
 
     protected function display_tpl($tpl, $vars, $content_type = 'text/html; charset=utf-8') {
@@ -42,19 +51,12 @@ abstract class BaseControler {
             return $this->router->show_404();
         }
 
-        extract($vars, EXTR_OVERWRITE);
-
-        ob_start();
-
-        require $this->tpl_path;
-
-        $result = ob_get_clean();
-
         if ($content_type !== null) {
-            Http::header('Content-type: ' . $content_type);
+            $this->header('Content-type: ' . $content_type);
         }
 
-        $this->send($result);
+        extract($vars, EXTR_OVERWRITE);
+        require $this->tpl_path;
     }
 
 }

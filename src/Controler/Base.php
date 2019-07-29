@@ -21,8 +21,10 @@ class Base extends BaseControler {
     public function c_proxy() {
         $host = isset($_SERVER['HTTP_HOST']) ? strval($_SERVER['HTTP_HOST']) : '';
         $host = preg_replace('/^([^:]*):.*$/', '$1', $host);
-        
+
         $cache_res = \App\Config::get('main', 'cache_res', 0);
+
+        $this->log('GET http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
 
         $this->display_tpl('proxy', [
             'host' => $host,

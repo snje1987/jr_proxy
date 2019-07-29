@@ -37,11 +37,11 @@ class Resource extends BaseControler {
         $mtime = \filemtime($full);
 
         $expire = gmdate('D, d M Y H:i:s', time() + self::$cache_time) . ' GMT';
-        Http::header('Expires: ' . $expire);
-        Http::header('Pragma: cache');
-        Http::header('Cache-Control: max-age=' . self::$cache_time);
-        Http::header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
-        Http::header('Etag: ' . $mtime);
+        $this->header('Expires: ' . $expire);
+        $this->header('Pragma: cache');
+        $this->header('Cache-Control: max-age=' . self::$cache_time);
+        $this->header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
+        $this->header('Etag: ' . $mtime);
 
         $mime_type = self::get_mime($full);
         if ($mime_type !== null) {
@@ -49,12 +49,10 @@ class Resource extends BaseControler {
         }
 
         if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) == $mtime) {
-            Http::header('HTTP/1.1 304 Not Modified');
-            $this->router->send('');
+            $this->header('HTTP/1.1 304 Not Modified');
         }
         else {
-            $content = file_get_contents($full);
-            $this->router->send($content);
+            readfile($full);
         }
     }
 

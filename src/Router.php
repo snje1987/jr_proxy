@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Exception;
+
 class Router {
 
     protected $connection;
@@ -36,19 +38,28 @@ class Router {
         }
 
         $controler = new $class_name($this);
-        $controler->dispatch($function_name);
+
+        ob_start();
+
+        try {
+            $controler->dispatch($function_name);
+            $html = ob_get_clean();
+        }
+        catch (Exception $ex) {
+            ob_end_clean();
+            $html = $ex->getMessage();
+        }
+
+        $this->connection->send($html);
+    }
+
+    public function header($header, $replace = true, $code = 0) {
+        return \Workerman\Protocols\Http::header($header, $replace, $code);
     }
 
     public function show_404() {
         \Workerman\Protocols\Http::header('Content-type:text/plain', true, 404);
         $this->connection->send("Page Not Found");
-    }
-
-    public function send($msg) {
-        if (is_array($msg)) {
-            $msg = json_encode($msg, JSON_UNESCAPED_UNICODE);
-        }
-        $this->connection->send($msg);
     }
 
     public function redirect($url) {

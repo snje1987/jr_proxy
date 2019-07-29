@@ -258,7 +258,7 @@ class Warlog extends BaseControler {
             ];
         }
 
-        $this->router->send($ret);
+        echo json_encode($ret, JSON_UNESCAPED_UNICODE);
     }
 
     //////////////////////////
