@@ -64,7 +64,7 @@ class PlayerInfo {
             }
             $this->tactics_list[$v['boat_id']][$v['tactics_id']] = $v['cid'];
         }
-        
+
         return $this;
     }
 
@@ -76,7 +76,7 @@ class PlayerInfo {
                 'ships' => $v['ships'],
             ];
         }
-        
+
         return $this;
     }
 
@@ -250,83 +250,36 @@ class PlayerInfo {
 
         $raw_info = $this->ship_list[$id];
 
-        $ship_info = [];
+        $ship_info = $raw_info;
 
-        $basic = ['id', 'title', 'level', 'shipCid', 'love',];
-
-        foreach ($basic as $k) {
-            $ship_info[$k] = $raw_info[$k];
-        }
+        unset($ship_info['battleProps']);
 
         foreach ($raw_info['battleProps'] as $k => $v) {
             $ship_info[$k] = $v;
         }
 
-        $ship_info['range'] = \App\App::RANGE_NAME[$ship_info['range']];
-
-        $ship_info['type'] = \App\App::SHIP_TYPE_HASH[$raw_info['type']];
-        $ship_info['isLocked'] = $raw_info['isLocked'] == 1 ? '是' : '否';
-        $ship_info['married'] = $raw_info['married'] == 1 ? '是' : '否';
-
-        $game_info = GameInfo::get();
-
-        $card = $game_info->get_ship_card($ship_info['shipCid']);
-
-        if ($card !== null) {
-            $ship_info['ori_title'] = $card['title'];
-            $country = $card['country'];
-            $ship_info['country'] = \App\App::COUNTRY_NAME[$country];
-            $ship_info['shipIndex'] = $card['shipIndex'];
-            $ship_info['evoClass'] = $card['evoClass'] > 0 ? '改' . $card['evoClass'] : '未改';
-        }
-
-        if ($raw_info['skillId'] != 0) {
-            $skill = $game_info->get_skill_card($raw_info['skillId']);
-            if ($skill !== null) {
-                $ship_info['skill'] = $skill;
-            }
-        }
-
-        $equip_list = [];
-        foreach ($raw_info['equipment'] as $eid) {
-            $equip = $game_info->get_equip_card($eid);
-            if ($equip !== null) {
-                $equip_list[] = $equip;
-            }
-        }
-        $ship_info['equipment'] = $equip_list;
-
-        foreach ($raw_info['capacitySlotExist'] as $k => $exist) {
-            if ($exist == 1) {
-                $ship_info['equipment'][$k]['num'] = $raw_info['capacitySlot'][$k];
-                $ship_info['equipment'][$k]['max'] = $raw_info['capacitySlotMax'][$k];
-            }
-        }
-
-        foreach ($raw_info['missileSlotExist'] as $k => $exist) {
-            if ($exist == 1) {
-                $ship_info['equipment'][$k]['num'] = $raw_info['missileSlot'][$k];
-                $ship_info['equipment'][$k]['max'] = $raw_info['missileSlotMax'][$k];
-            }
-        }
-
-        $tactic_list = [];
+        $tactics = [];
         if (isset($this->tactics_list[$raw_info['id']])) {
-            foreach ($this->tactics_list[$raw_info['id']] as $tcid => $tid) {
-                $tactic = $game_info->get_tactics_card($tid);
-                if ($tactic !== null) {
-                    $tactic_list[$tcid] = $tactic;
+            $all_tactics = $this->tactics_list[$raw_info['id']];
+
+            foreach ($raw_info['tactics'] as $tcid) {
+                if ($tcid > 0) {
+                    $tactics[] = $all_tactics[$tcid];
+                    unset($all_tactics[$tcid]);
                 }
             }
-        }
 
-        foreach ($raw_info['tactics'] as $k => $tcid) {
-            if (isset($tactic_list[$tcid])) {
-                $tactic_list[$tcid]['inuse'] = true;
+            $ship_info['tactics'] = $tactics;
+            $ship_info['tactics_avl'] = [];
+
+            foreach ($all_tactics as $tid) {
+                $ship_info['tactics_avl'][] = $tid;
             }
         }
-
-        $ship_info['tactics'] = $tactic_list;
+        else {
+            $ship_info['tactics'] = [];
+            $ship_info['tactics_avl'] = [];
+        }
 
         return $ship_info;
     }

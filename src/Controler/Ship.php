@@ -4,6 +4,7 @@ namespace App\Controler;
 
 use App\Model\PlayerInfo;
 use App\Model\Calculator;
+use App\Model\Fleet;
 use Exception;
 
 class Ship extends BaseControler {
@@ -114,13 +115,16 @@ class Ship extends BaseControler {
                 }
             }
         }
+        
+        $fleet = new Fleet();
+        $fleet->set_ships($ship_list);
 
         $this->display_tpl('ship/fleet', [
             'cur_fleet' => $cur_fleet,
             'fleet_list' => $fleet_list,
             'uid_list' => $uid_list,
             'cur_uid' => $cur_uid,
-            'ship_list' => $ship_list,
+            'fleet' => $fleet,
         ]);
     }
 

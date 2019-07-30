@@ -28,15 +28,22 @@
                 </div>
                 <div class="col-sm-9 col-xs-10">
                     <div class="row">
-                        <?php if (!empty($ship_list)) { ?>
-                            <?php foreach ($ship_list as $k => $ship) { ?>
-                                <?php if ($k % 3 == 0 && $k != 0) { ?>
-                                </div><div class="row">
-                                <?php } ?>
-                                <div class="col-sm-4" style="padding:2px;">
-                                    <?php include APP_TPL_DIR . '/inc/ship_card.php' ?>
-                                </div>
+                        <?php
+                        $fleet_card = $fleet->get_fleet_card();
+                        include APP_TPL_DIR . '/inc/fleet_card.php';
+                        ?>
+                    </div>
+                    <div class="row">
+                        <?php
+                        $ship_list = $fleet->get_ship_cards();
+                        foreach ($ship_list as $k => $ship) {
+                            ?>
+                            <?php if ($k % 3 == 0 && $k != 0) { ?>
+                            </div><div class="row">
                             <?php } ?>
+                            <div class="col-sm-4" style="padding:2px;">
+                                <?php include APP_TPL_DIR . '/inc/ship_card.php' ?>
+                            </div>
                         <?php } ?>
                     </div>
                 </div>

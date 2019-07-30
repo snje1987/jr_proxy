@@ -4,7 +4,6 @@ use App\App;
 
 $basic_props = [
     'shipIndex' => '编号',
-    'type' => '类型',
     'evoClass' => '改造',
     'country' => '国家',
     'level' => '等级',
@@ -16,7 +15,18 @@ $basic_props = [
 <div class="panel panel-primary">
     <div class="panel-heading" style="padding:5px;"><?= $ship['title'] ?></div>
 
-    <div style="width:100%;text-align:left;background-color:#f5f5f5;color:#337ab7;padding:5px;border-bottom:1px solid #ddd;">基本属性</div>
+    <div class="panel-body" style="padding:5px;">
+        <div class="btn btn-group btn-group-xs" style="padding:1px;">
+            <span class="btn btn-primary">类型</span>
+            <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;"><?= $ship['type'] ?></span>
+        </div>
+        <div class="btn btn-group btn-group-xs" style="padding:1px;">
+            <span class="btn btn-primary">图鉴名称</span>
+            <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;"><?= $ship['ori_title'] ?></span>
+        </div>
+    </div>
+
+    <div style="width:100%;text-align:left;background-color:#f5f5f5;color:#337ab7;padding:5px;border:1px solid #ddd;border-left: 0;border-right:0;">基本属性</div>
 
     <div class="panel-body" style="padding:5px;">
         <?php foreach ($basic_props as $k => $name) { ?>
@@ -72,7 +82,10 @@ $basic_props = [
 
     <div class="panel-body" style="padding:5px;">
         <?php foreach ($ship['tactics'] as $tactic) { ?>
-            <span class="btn btn-<?= isset($tactic['inuse']) && $tactic['inuse'] == true ? 'primary' : 'default' ?> btn-xs" title="<?= $tactic['desc'] ?>"><?= $tactic['title'] ?> Lv<?= $tactic['level'] ?></span>
+            <span class="btn btn-primary btn-xs" title="<?= $tactic['desc'] ?>"><?= $tactic['title'] ?> Lv<?= $tactic['level'] ?></span>
+        <?php } ?>
+        <?php foreach ($ship['tactics_avl'] as $tactic) { ?>
+            <span class="btn btn-default btn-xs" title="<?= $tactic['desc'] ?>"><?= $tactic['title'] ?> Lv<?= $tactic['level'] ?></span>
         <?php } ?>
     </div>
 </div>
