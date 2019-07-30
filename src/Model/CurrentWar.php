@@ -96,6 +96,7 @@ class CurrentWar {
 
         $data = [
             'type' => $this->type,
+            'version' => LogUpgrader::VERSION,
             'war_spy' => $this->war_spy,
             'war_day' => $this->war_day,
             'war_result' => $this->war_result,

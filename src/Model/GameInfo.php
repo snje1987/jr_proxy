@@ -9,10 +9,11 @@ class GameInfo {
 
     const GAME_INFO_URL = 'http://login.jr.moefantasy.com:80/index/getInitConfigs/';
     const DATA_FILE = APP_DATA_DIR . '/game_info.json';
+    const VERSION = '1.0.3';
 
     protected $file;
     protected $data_version = '';
-    protected $app_version = '';
+    protected $version = '';
     protected $game_version = '';
     protected $ship_cards = []; //舰船
     protected $equip_cards = []; //装备
@@ -74,7 +75,7 @@ class GameInfo {
         }
 
         $this->data_version = $json['DataVersion'];
-        $this->app_version = \App\App::APP_VERSION;
+        $this->version = self::VERSION;
 
         if (isset($json['shipCardWu'])) {
             $this->build_ship_cards($json['shipCardWu']);
@@ -103,7 +104,7 @@ class GameInfo {
     }
 
     public function update_check($new_game_version, $new_data_version) {
-        if ($this->app_version !== \App\App::APP_VERSION ||
+        if ($this->version !== self::VERSION ||
                 $this->data_version !== $new_data_version ||
                 $this->game_version !== $new_game_version
         ) {
@@ -280,7 +281,7 @@ class GameInfo {
     protected function save_info() {
         $data = [
             'data_version' => $this->data_version,
-            'app_version' => $this->app_version,
+            'version' => $this->version,
             'game_version' => $this->game_version,
             'ship_cards' => $this->ship_cards,
             'equip_cards' => $this->equip_cards,
@@ -304,7 +305,7 @@ class GameInfo {
         }
 
         $this->data_version = isset($data['data_version']) ? strval($data['data_version']) : '';
-        $this->app_version = isset($data['app_version']) ? strval($data['app_version']) : '';
+        $this->version = isset($data['version']) ? strval($data['version']) : '';
         $this->game_version = isset($data['game_version']) ? strval($data['game_version']) : '';
         $this->ship_cards = isset($data['ship_cards']) ? $data['ship_cards'] : [];
         $this->equip_cards = isset($data['equip_cards']) ? $data['equip_cards'] : [];

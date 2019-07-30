@@ -47,6 +47,7 @@ class WarLog {
                 throw new Exception();
             }
 
+            $this->raw_data = LogUpgrader::upgrade(CurrentWar::BASE_DIR . $file, $this->raw_data);
             $this->decode();
 
             return true;
