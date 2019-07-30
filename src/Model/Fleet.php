@@ -154,7 +154,7 @@ class Fleet {
                 $equip_list[] = $equip;
 
                 foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
-                    if (!isset($equip[$k]) || !isset($result[$k])) {
+                    if (!isset($equip[$k]) || !isset($result[$k]) || $k == 'range') {
                         continue;
                     }
                     if ($k == 'hp') {
@@ -175,25 +175,38 @@ class Fleet {
                     }
                 }
             }
+            else {
+                $equip_list[] = null;
+            }
         }
         $result['equipment'] = $equip_list;
 
-        if (isset($ship['capacitySlotExist'])) {
-            foreach ($ship['capacitySlotExist'] as $k => $exist) {
-                if ($exist == 1) {
-                    $result['equipment'][$k]['num'] = $ship['capacitySlot'][$k];
-                    $result['equipment'][$k]['max'] = $ship['capacitySlotMax'][$k];
-                }
+        foreach ($result['equipment'] as $k => $equip) {
+            if ($equip === null) {
+                continue;
             }
-        }
+            if (!isset($equip['aluminiumUse']) || $equip['aluminiumUse'] <= 0) {
+                continue;
+            }
 
-        if (isset($ship['missileSlotExist'])) {
-            foreach ($ship['missileSlotExist'] as $k => $exist) {
-                if ($exist == 1) {
-                    $result['equipment'][$k]['num'] = $ship['missileSlot'][$k];
-                    $result['equipment'][$k]['max'] = $ship['missileSlotMax'][$k];
+            $check_names = ['capacitySlot', 'missileSlot'];
+
+            foreach ($check_names as $check_name) {
+                if (!isset($ship[$check_name])) {
+                    continue;
+                }
+
+                if (!isset($ship[$check_name . 'Exist']) ||
+                        (isset($ship[$check_name . 'Exist'][$k]) && $ship[$check_name . 'Exist'][$k] == 1)) {
+                    if ($ship[$check_name . 'Max'][$k] > 0) {
+                        $equip['num'] = $ship[$check_name][$k];
+                        $equip['max'] = $ship[$check_name . 'Max'][$k];
+                        break;
+                    }
                 }
             }
+
+            $result['equipment'][$k] = $equip;
         }
 
         return $result;

@@ -489,7 +489,9 @@ class WarLog {
 
             if ($this->cfg_show_card_name) {
                 $ship_card = $this->game_info->get_ship_card($info['shipCid']);
-                $ship['title'] = $ship_card['title'];
+                if ($ship_card !== null) {
+                    $ship['title'] = $ship_card['title'];
+                }
             }
 
             $index = $info['indexInFleet'];

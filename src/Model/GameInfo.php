@@ -235,22 +235,27 @@ class GameInfo {
         if ($equip['airDef'] != 0) {
             if (isset($equip['airDefCorrect']) && $equip['airDefCorrect'] != 0) {
                 $desc[] = '对空补正:' . $equip['airDefCorrect'];
+                $info['airDefCorrect'] = $equip['airDefCorrect'];
             }
             if (isset($equip['airDefRate']) && $equip['airDefRate'] != 0) {
                 $desc[] = '对空倍率:' . $equip['airDefRate'];
+                $info['airDefRate'] = $equip['airDefRate'];
             }
         }
 
         if (isset($equip['missileHit']) && $equip['missileHit'] != 0) {
             $desc[] = '突防:' . $equip['missileHit'];
+            $info['missileHit'] = $equip['missileHit'];
         }
 
         if (isset($equip['aluminiumUse']) && $equip['aluminiumUse'] != 0) {
             $desc[] = '铝耗:' . $equip['aluminiumUse'];
+            $info['aluminiumUse'] = $equip['aluminiumUse'];
         }
 
         if (isset($equip['range']) && $equip['range'] > 1) {
             $desc[] = '射程:' . self::EQUIP_RANGE_NAME[$equip['range']];
+            $info['range'] = $equip['range'];
         }
 
         $names = ['desc', 'desc2'];
