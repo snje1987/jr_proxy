@@ -152,6 +152,28 @@ class Fleet {
             $equip = $this->game_info->get_equip_card($eid);
             if ($equip !== null) {
                 $equip_list[] = $equip;
+
+                foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
+                    if (!isset($equip[$k]) || !isset($result[$k])) {
+                        continue;
+                    }
+                    if ($k == 'hp') {
+                        if (!is_array($result['hpMax'])) {
+                            $result['hpMax'] = [$result['hpMax'], $equip['hp']];
+                        }
+                        else {
+                            $result['hpMax'][1] += $equip['hp'];
+                        }
+                    }
+                    else {
+                        if (!is_array($result[$k])) {
+                            $result[$k] = [$result[$k], $equip[$k]];
+                        }
+                        else {
+                            $result[$k][1] += $equip[$k];
+                        }
+                    }
+                }
             }
         }
         $result['equipment'] = $equip_list;

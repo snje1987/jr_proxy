@@ -39,9 +39,11 @@ $basic_props = [
             ?>
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary"><?= $name ?></span>
-                <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;"><?= $ship[$k] ?></span>
+                <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;">
+                    <?= is_array($ship[$k]) ? $ship[$k][0] . '+' . $ship[$k][1] . '=' . ($ship[$k][0] + $ship[$k][1]) : $ship[$k] ?>
+                </span>
             </div>
-<?php } ?>
+        <?php } ?>
     </div>
 
     <div style="width:100%;text-align:left;background-color:#f5f5f5;color:#337ab7;padding:5px;border:1px solid #ddd;border-left: 0;border-right:0;">战斗属性</div>
@@ -49,7 +51,9 @@ $basic_props = [
     <div class="panel-body" style="padding:5px;">
         <div class="btn btn-group btn-group-xs" style="padding:1px;">
             <span class="btn btn-primary">耐久</span>
-            <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;"><?= $ship['hp'] ?>/<?= $ship['hpMax'] ?></span>
+            <span class="btn btn-info" style="color:black;min-width:90px;text-align:right;">
+                <?= $ship['hp'] ?>/<?= is_array($ship['hpMax']) ? $ship['hpMax'][0] . '+' . $ship['hpMax'][1] . '=' . ($ship['hpMax'][0] + $ship['hpMax'][1]) : $ship['hpMax'] ?>
+            </span>
         </div>
         <?php foreach (App::SHIP_BATTLE_PROP_NAME as $k => $name) { ?>
             <?php
@@ -59,22 +63,24 @@ $basic_props = [
             ?>
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary"><?= $name ?></span>
-                <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;"><?= $ship[$k] ?></span>
+                <span class="btn btn-info" style="color:black;min-width:90px;text-align:right;">
+                    <?= is_array($ship[$k]) ? $ship[$k][0] . '+' . $ship[$k][1] . '=' . ($ship[$k][0] + $ship[$k][1]) : $ship[$k] ?>
+                </span>
             </div>
-<?php } ?>
+        <?php } ?>
     </div>
 
     <div style="width:100%;text-align:left;background-color:#f5f5f5;color:#337ab7;padding:5px;border:1px solid #ddd;border-left: 0;border-right:0;">装备</div>
 
     <div class="panel-body" style="padding:5px;">
-            <?php foreach ($ship['equipment'] as $equip) { ?>
+        <?php foreach ($ship['equipment'] as $equip) { ?>
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary" title="<?= $equip['desc'] ?>"><?= $equip['title'] ?></span>
                 <?php if (isset($equip['num'])) { ?>
                     <span class="btn btn-info" style="color:black;"><?= $equip['num'] ?>/<?= $equip['max'] ?></span>
-            <?php } ?>
+                <?php } ?>
             </div>
-<?php } ?>
+        <?php } ?>
     </div>
 
     <div style="width:100%;text-align:left;background-color:#f5f5f5;color:#337ab7;padding:5px;border:1px solid #ddd;border-left: 0;border-right:0;">技能</div>
@@ -82,7 +88,7 @@ $basic_props = [
     <div class="panel-body" style="padding:5px;">
         <?php if (!empty($ship['skill'])) { ?>
             <span class="btn btn-primary btn-xs" title="<?= $ship['skill']['desc'] ?>"><?= $ship['skill']['title'] ?> Lv<?= $ship['skill']['level'] ?></span>
-<?php } ?>
+        <?php } ?>
     </div>
 
     <div style="width:100%;text-align:left;background-color:#f5f5f5;color:#337ab7;padding:5px;border:1px solid #ddd;border-left: 0;border-right:0;">战术</div>
@@ -93,6 +99,6 @@ $basic_props = [
         <?php } ?>
         <?php foreach ($ship['tactics_avl'] as $tactic) { ?>
             <span class="btn btn-default btn-xs" title="<?= $tactic['desc'] ?>"><?= $tactic['title'] ?> Lv<?= $tactic['level'] ?></span>
-<?php } ?>
+        <?php } ?>
     </div>
 </div>

@@ -290,10 +290,13 @@ class PlayerInfo {
         $ret = [];
         foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
             if ($k == 'hpMax') {
-                $ret[$k] = $info['battlePropsMax']['hp'];
+                $ret[$k] = $info['battlePropsBasic']['hp'];
+            }
+            elseif($k == 'hp'){
+                $ret[$k] = $info['battleProps']['hp'];
             }
             else {
-                $ret[$k] = $info['battleProps'][$k];
+                $ret[$k] = $info['battlePropsBasic'][$k];
             }
         }
         return $ret;
