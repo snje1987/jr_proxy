@@ -483,7 +483,14 @@ class WarLog {
         $ship_info = [];
 
         foreach ($list as $info) {
-            $ship = [];
+            $ship = $info;
+            
+            $ship['hp_left'] = $ship['hp'];
+            
+            $index = $info['indexInFleet'];
+            $ship_info[$index] = $ship;
+
+            continue;
 
             $ship_card = $this->game_info->get_ship_card($info['shipCid']);
 
@@ -546,9 +553,6 @@ class WarLog {
             }
 
             $ship['skill'] = $this->game_info->get_skill_card($info['skillId']);
-
-            $index = $info['indexInFleet'];
-            $ship_info[$index] = $ship;
         }
 
         ksort($ship_info, SORT_NUMERIC);

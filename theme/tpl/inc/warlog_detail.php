@@ -4,37 +4,19 @@ use App\Controler\Warlog ?>
 <div class="panel panel-primary">
     <div class="panel-heading" data-toggle="collapse" data-target="#self_fleet">我方舰队-<?= $log->self_fleet['formation'] ?>-<?= $log->self_fleet['title'] ?></div>
     <div class="collapse" id="self_fleet">
-        <table class="table table-bordered table-hover table-condensed table-striped">
-            <tr>
-                <th class="text-center">名称</th>
-                <th class="text-center" width="395">属性</th>
-                <th class="text-center" width="220">装备</th>
-                <th class="text-center" width="100">技能</th>
-                <th class="text-center" width="100">战术</th>
-            </tr>
-            <?php foreach ($log->self_ships as $index => $ship) { ?>
-                <?php $class = 'success' ?>
-                <?php include APP_TPL_DIR . '/inc/warlog_ship.php' ?>
-            <?php } ?>
-        </table>
+        <div class="container-fluid" style="padding:5px 20px;">
+            <?php $fleet = $self_fleet; ?>
+            <?php include APP_TPL_DIR . '/inc/fleet_card.php' ?>
+        </div>
     </div>
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading" data-toggle="collapse" data-target="#enemy_fleet">敌方舰队-<?= $log->enemy_fleet['formation'] ?>-<?= $log->enemy_fleet['title'] ?></div>
     <div class="collapse" id="enemy_fleet">
-        <table class="table table-bordered table-hover table-condensed table-striped">
-            <tr>
-                <th class="text-center">名称</th>
-                <th class="text-center" width="395">属性</th>
-                <th class="text-center" width="220">装备</th>
-                <th class="text-center" width="100">技能</th>
-                <th class="text-center" width="100">战术</th>
-            </tr>
-            <?php foreach ($log->enemy_ships as $index => $ship) { ?>
-                <?php $class = 'danger' ?>
-                <?php include APP_TPL_DIR . '/inc/warlog_ship.php' ?>
-            <?php } ?>
-        </table>
+        <div class="container-fluid" style="padding:5px 20px;">
+            <?php $fleet = $enemy_fleet; ?>
+            <?php include APP_TPL_DIR . '/inc/fleet_card.php' ?>
+        </div>
     </div>
 </div>
 <div class="panel panel-primary">

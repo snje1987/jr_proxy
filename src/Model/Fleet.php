@@ -66,7 +66,9 @@ class Fleet {
         $result['range'] = \App\App::RANGE_NAME[$ship['range']];
 
         $result['type'] = \App\App::SHIP_TYPE_HASH[$ship['type']];
-        $result['isLocked'] = $ship['isLocked'] == 1 ? '是' : '否';
+        if (isset($ship['isLocked'])) {
+            $result['isLocked'] = $ship['isLocked'] == 1 ? '是' : '否';
+        }
         $result['married'] = $ship['married'] == 1 ? '是' : '否';
 
         $ship_card = $this->game_info->get_ship_card($result['shipCid']);
@@ -89,10 +91,12 @@ class Fleet {
         $result['tactics'] = $list;
 
         $list = [];
-        foreach ($ship['tactics_avl'] as $tid) {
-            $card = $this->game_info->get_tactics_card($tid);
-            if ($card !== null) {
-                $list[] = $card;
+        if (isset($ship['tactics_avl'])) {
+            foreach ($ship['tactics_avl'] as $tid) {
+                $card = $this->game_info->get_tactics_card($tid);
+                if ($card !== null) {
+                    $list[] = $card;
+                }
             }
         }
         $result['tactics_avl'] = $list;
@@ -114,17 +118,21 @@ class Fleet {
         }
         $result['equipment'] = $equip_list;
 
-        foreach ($ship['capacitySlotExist'] as $k => $exist) {
-            if ($exist == 1) {
-                $result['equipment'][$k]['num'] = $ship['capacitySlot'][$k];
-                $result['equipment'][$k]['max'] = $ship['capacitySlotMax'][$k];
+        if (isset($ship['capacitySlotExist'])) {
+            foreach ($ship['capacitySlotExist'] as $k => $exist) {
+                if ($exist == 1) {
+                    $result['equipment'][$k]['num'] = $ship['capacitySlot'][$k];
+                    $result['equipment'][$k]['max'] = $ship['capacitySlotMax'][$k];
+                }
             }
         }
 
-        foreach ($ship['missileSlotExist'] as $k => $exist) {
-            if ($exist == 1) {
-                $result['equipment'][$k]['num'] = $ship['missileSlot'][$k];
-                $result['equipment'][$k]['max'] = $ship['missileSlotMax'][$k];
+        if (isset($ship['missileSlotExist'])) {
+            foreach ($ship['missileSlotExist'] as $k => $exist) {
+                if ($exist == 1) {
+                    $result['equipment'][$k]['num'] = $ship['missileSlot'][$k];
+                    $result['equipment'][$k]['max'] = $ship['missileSlotMax'][$k];
+                }
             }
         }
 
