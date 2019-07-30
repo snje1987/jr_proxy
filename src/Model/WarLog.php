@@ -484,75 +484,16 @@ class WarLog {
 
         foreach ($list as $info) {
             $ship = $info;
-            
+
             $ship['hp_left'] = $ship['hp'];
-            
-            $index = $info['indexInFleet'];
-            $ship_info[$index] = $ship;
-
-            continue;
-
-            $ship_card = $this->game_info->get_ship_card($info['shipCid']);
 
             if ($this->cfg_show_card_name) {
+                $ship_card = $this->game_info->get_ship_card($info['shipCid']);
                 $ship['title'] = $ship_card['title'];
             }
-            else {
-                $ship['title'] = $info['title'];
-            }
 
-            $ship['level'] = $info['level'];
-
-            if ($ship_card !== null) {
-                $ship['desc'] = $ship_card['shipIndex'] . '-' . $ship_card['title'];
-                if ($ship_card['evoClass'] > 0) {
-                    $ship['desc'] .= '-改' . $ship_card['evoClass'];
-                }
-            }
-            else {
-                $ship['desc'] = '';
-            }
-
-            foreach (self::SHIP_ATTR_NAME as $k => $v) {
-                if (isset($info[$k])) {
-                    $ship[$k] = $info[$k];
-                }
-            }
-
-            $ship['hp_left'] = $ship['hp'];
-
-            $ship['range'] = GameInfo::EQUIP_RANGE_NAME[$info['range']];
-
-            $ship['equip'] = [];
-            foreach ($info['equipment'] as $cid) {
-                if ($cid < 0) {
-                    continue;
-                }
-                $card = $this->game_info->get_equip_card($cid);
-                $ship['equip'][] = $card;
-
-                foreach (self::SHIP_ATTR_HASH as $k => $v) {
-                    if (!isset($card[$k])) {
-                        continue;
-                    }
-                    if (!is_array($ship[$v])) {
-                        $ship[$v] = [$ship[$v], $card[$k]];
-                    }
-                    else {
-                        $ship[$v][1] += $card[$k];
-                    }
-                }
-            }
-
-            $ship['tactics'] = [];
-            foreach ($info['tactics'] as $cid) {
-                if ($cid == 0) {
-                    continue;
-                }
-                $ship['tactics'][] = $this->game_info->get_tactics_card($cid);
-            }
-
-            $ship['skill'] = $this->game_info->get_skill_card($info['skillId']);
+            $index = $info['indexInFleet'];
+            $ship_info[$index] = $ship;
         }
 
         ksort($ship_info, SORT_NUMERIC);
