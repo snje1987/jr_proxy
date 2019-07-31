@@ -33,11 +33,11 @@
                         <?php foreach ($target as $id => $v) { ?>
                             <tr>
                                 <td class="text-center"><input type="radio" name="target" value="<?= $id ?>" /></td>
-                                <td class="text-center"><?= $v['title'] ?></td>
-                                <td class="text-center"><?= $v['strengthenAttribute']['atk'] ?> / <?= $v['strengthenTop']['atk'] ?></td>
-                                <td class="text-center"><?= $v['strengthenAttribute']['torpedo'] ?> / <?= $v['strengthenTop']['torpedo'] ?></td>
-                                <td class="text-center"><?= $v['strengthenAttribute']['def'] ?> / <?= $v['strengthenTop']['def'] ?></td>
-                                <td class="text-center"><?= $v['strengthenAttribute']['air_def'] ?> /<?= $v['strengthenTop']['air_def'] ?> </td>
+                                <td class="text-center"><?= $v->title ?></td>
+                                <td class="text-center"><?= $v->strengthen['atk'] ?> / <?= $v->strengthen_top['atk'] ?></td>
+                                <td class="text-center"><?= $v->strengthen['torpedo'] ?> / <?= $v->strengthen_top['torpedo'] ?></td>
+                                <td class="text-center"><?= $v->strengthen['def'] ?> / <?= $v->strengthen_top['def'] ?></td>
+                                <td class="text-center"><?= $v->strengthen['air_def'] ?> /<?= $v->strengthen_top['air_def'] ?> </td>
                             </tr>
                         <?php } ?>
                     </table>
@@ -58,10 +58,10 @@
                                 <td class="text-center"><?= $v['title'] ?></td>
                                 <td class="text-center"><?= $v['count'] ?></td>
                                 <td class="text-center">
-                                    <?= $v['strengthenSupplyExp']['atk'] ?> /
-                                    <?= $v['strengthenSupplyExp']['torpedo'] ?> /
-                                    <?= $v['strengthenSupplyExp']['def'] ?> /
-                                    <?= $v['strengthenSupplyExp']['air_def'] ?>
+                                    <?= $v['strengthen_supply']['atk'] ?> /
+                                    <?= $v['strengthen_supply']['torpedo'] ?> /
+                                    <?= $v['strengthen_supply']['def'] ?> /
+                                    <?= $v['strengthen_supply']['air_def'] ?>
                                 </td>
                                 <td class="text-center">
                                     <?= $v['dismantle']['2'] ?> /

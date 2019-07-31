@@ -26,7 +26,7 @@ class Ship extends BaseControler {
         $play_info = new PlayerInfo($cur_uid);
 
         $material = $play_info->get_material_ships();
-        $target = $play_info->get_target_ships();
+        $target = $play_info->get_need_strengthen_ships();
 
         $values = \App\Config::get('main', 'values');
         $points = \App\Config::get('main', 'points');
@@ -55,8 +55,8 @@ class Ship extends BaseControler {
 
             $player_info = new PlayerInfo($uid);
 
-            $target_ship = $player_info->get_target_ship($target);
-            if ($target_ship === null) {
+            $target_ship = $player_info->get_ship($target);
+            if ($target_ship === null || !$target_ship->need_strengthen()) {
                 throw new Exception('强化目标不存在');
             }
 
@@ -107,11 +107,8 @@ class Ship extends BaseControler {
 
         $fleet = null;
         if ($cur_fleet > 0) {
-            $fleet_info = $play_info->get_fleet($cur_fleet);
-            $fleet = new Fleet();
-            $fleet->set_ships($fleet_info['ships']);
+            $fleet = $play_info->get_fleet($cur_fleet);
         }
-
 
         $this->display_tpl('ship/fleet', [
             'cur_fleet' => $cur_fleet,

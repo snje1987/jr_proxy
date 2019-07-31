@@ -7,7 +7,7 @@ use Exception;
 class LogUpgrader {
 
     const MIN_VERSION = '1.0.0';
-    const VERSION = '1.0.2';
+    const VERSION = '1.0.1';
 
     public static function upgrade($file, $raw_data) {
 

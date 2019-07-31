@@ -19,27 +19,29 @@ $fleet_card = $fleet->get_fleet_card();
         <div class="panel-heading" style="padding:5px;">舰队属性</div>
         <div class="panel-body" style="padding:5px;">
             <?php foreach ($fleet_props as $k => $name) { ?>
-                <?php if (!isset($fleet_card[$k])) {
+                <?php
+                if (!isset($fleet_card[$k])) {
                     continue;
-                } ?>
+                }
+                ?>
                 <div class="btn btn-group btn-group-xs" style="padding:1px;">
                     <span class="btn btn-primary"><?= $name ?></span>
                     <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;"><?= $fleet_card[$k] ?></span>
                 </div>
-<?php } ?>
+            <?php } ?>
         </div>
     </div>
 </div>
 <div class="row">
     <?php
-    $ship_list = $fleet->get_ship_cards();
-    foreach ($ship_list as $k => $ship) {
+    $ships = $fleet->get_ships();
+    foreach ($ships as $k => $ship) {
         ?>
         <?php if ($k % 3 == 0 && $k != 0) { ?>
         </div><div class="row">
-            <?php } ?>
+        <?php } ?>
         <div class="col-sm-4" style="padding:2px;">
-        <?php include APP_TPL_DIR . '/inc/ship_card.php' ?>
+            <?php include APP_TPL_DIR . '/inc/ship_card.php' ?>
         </div>
-<?php } ?>
+    <?php } ?>
 </div>

@@ -2,14 +2,16 @@
 
 namespace App\Model;
 
-class PlayerInfo {
+use Exception;
+use JsonSerializable;
+
+class PlayerInfo implements JsonSerializable {
 
     const DATA_DIR = APP_DATA_DIR . '/player_info/';
 
     protected $file;
     protected $uid;
     protected $ship_list = [];
-    protected $tactics_list = [];
     protected $fleet_list = [];
 
     public function __construct($uid, $noload = false) {
@@ -20,6 +22,7 @@ class PlayerInfo {
         }
 
         $this->file = self::DATA_DIR . $this->uid . '.json';
+        $this->game_info = GameInfo::get();
 
         if (!$noload) {
             $this->load();
@@ -27,14 +30,7 @@ class PlayerInfo {
     }
 
     public function save() {
-        ksort($this->ship_list);
-        $data = [
-            'ship_list' => $this->ship_list,
-            'tactics_list' => $this->tactics_list,
-            'fleet_list' => $this->fleet_list,
-        ];
-
-        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $json = json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
         file_put_contents($this->file, $json);
 
@@ -50,19 +46,31 @@ class PlayerInfo {
             $data = [];
         }
 
-        $this->ship_list = isset($data['ship_list']) ? $data['ship_list'] : [];
-        $this->tactics_list = isset($data['tactics_list']) ? $data['tactics_list'] : [];
+        $ship_list = isset($data['ship_list']) ? $data['ship_list'] : [];
         $this->fleet_list = isset($data['fleet_list']) ? $data['fleet_list'] : [];
+
+        $this->ship_list = [];
+        foreach ($ship_list as $v) {
+            $id = $v['id'];
+            try {
+                $ship = new Ship();
+                $ship->init_from_save($v);
+                $this->ship_list[$id] = $ship;
+            }
+            catch (Exception $ex) {
+                
+            }
+        }
 
         return $this;
     }
 
     public function set_tactics($list) {
         foreach ($list as $v) {
-            if (!isset($this->tactics_list[$v['boat_id']])) {
-                $this->tactics_list[$v['boat_id']] = [];
+            if (!isset($this->ship_list[$v['boat_id']])) {
+                continue;
             }
-            $this->tactics_list[$v['boat_id']][$v['tactics_id']] = $v['cid'];
+            $this->ship_list[$v['boat_id']]->set_tactic($v['tactics_id'], $v['cid']);
         }
 
         return $this;
@@ -72,6 +80,7 @@ class PlayerInfo {
         foreach ($list as $v) {
             $id = $v['id'];
             $this->fleet_list[$id] = [
+                'id' => $id,
                 'title' => $v['title'],
                 'ships' => $v['ships'],
             ];
@@ -88,29 +97,22 @@ class PlayerInfo {
     }
 
     public function set_ship($info) {
-        $id = $info['id'];
+        try {
+            $id = $info['id'];
 
-        $ship = self::get_battle_props($info);
-
-        $attrs = [
-            'id', 'title', 'level', 'shipCid', 'isLocked',
-            'type', 'love', 'married', 'strengthenAttribute', 'equipment',
-            'capacitySlot', 'capacitySlotMax', 'capacitySlotExist', 'missileSlot', 'missileSlotMax',
-            'missileSlotExist', 'tactics', 'skillId',
-        ];
-
-        foreach ($attrs as $v) {
-            if (isset($info[$v])) {
-
-                $ship[$v] = $info[$v];
+            if (isset($this->ship_list[$id])) {
+                $ship = $this->ship_list[$id];
             }
             else {
-                $ship[$v] = 0;
+                $ship = new Ship();
             }
+
+            $ship->init_from_api($info);
+            $this->ship_list[$id] = $ship;
         }
-
-        $this->ship_list[$id] = $ship;
-
+        catch (Exception $ex) {
+            
+        }
         return $this;
     }
 
@@ -128,12 +130,7 @@ class PlayerInfo {
         }
         $ship = $this->ship_list[$id];
 
-        $ship['oil'] = $info['oil'];
-        $ship['ammo'] = $info['ammo'];
-        $ship['capacitySlot'] = $info['capacitySlot'];
-        $ship['missileSlot'] = $info['missileSlot'];
-
-        $this->ship_list[$id] = $ship;
+        $ship->update_res($info);
 
         return $this;
     }
@@ -148,60 +145,21 @@ class PlayerInfo {
         return $this;
     }
 
-    public function get_target_ship($id) {
+    public function get_ship($id) {
         if (!isset($this->ship_list[$id])) {
             return null;
         }
-
-        $ship = $this->ship_list[$id];
-        if ($ship['isLocked'] != 1) {
-            return null;
-        }
-
-        $game_info = GameInfo::get();
-
-        $card = $game_info->get_ship_card($ship['shipCid']);
-        if ($card === null) {
-            return null;
-        }
-
-        $cur_strengthen = $ship['strengthenAttribute'];
-        $full_strengthen = $card['strengthenTop'];
-
-        foreach ($cur_strengthen as $k1 => $v1) {
-            if ($v1 < $full_strengthen[$k1]) {
-                $ship['strengthenTop'] = $full_strengthen;
-                return $ship;
-            }
-        }
-
-        return null;
+        return $this->ship_list[$id];
     }
 
-    public function get_target_ships() {
-
-        $game_info = GameInfo::get();
-
+    public function get_need_strengthen_ships() {
         $list = [];
 
-        foreach ($this->ship_list as $id => $v) {
-            if ($v['isLocked'] == 1) {
-                $card = $game_info->get_ship_card($v['shipCid']);
-                if ($card !== null) {
-                    $cur_strengthen = $v['strengthenAttribute'];
-                    $full_strengthen = $card['strengthenTop'];
-
-                    foreach ($cur_strengthen as $k1 => $v1) {
-                        if ($v1 < $full_strengthen[$k1]) {
-                            $v['strengthenTop'] = $full_strengthen;
-                            $list[$id] = $v;
-                            break;
-                        }
-                    }
-                }
+        foreach ($this->ship_list as $id => $ship) {
+            if ($ship->is_locked == 1 && $ship->need_strengthen()) {
+                $list[$id] = $ship;
             }
         }
-
         ksort($list);
 
         return $list;
@@ -212,29 +170,29 @@ class PlayerInfo {
 
         $list = [];
 
-        foreach ($this->ship_list as $id => $v) {
-            if ($v['isLocked'] == 0) {
-                if (!isset($list[$v['shipCid']])) {
+        foreach ($this->ship_list as $id => $ship) {
+            if ($ship->is_locked == 0) {
+                if (!isset($list[$ship->ship_cid])) {
 
-                    if (is_array($cid) && !in_array($v['shipCid'], $cid)) {
+                    if (is_array($cid) && !in_array($ship->ship_cid, $cid)) {
                         continue;
                     }
 
-                    $card = $game_info->get_ship_card($v['shipCid']);
+                    $card = $game_info->get_ship_card($ship->ship_cid);
 
                     if ($card === null) {
                         continue;
                     }
 
-                    $list[$v['shipCid']] = [
+                    $list[$ship->ship_cid] = [
                         'count' => 1,
-                        'title' => $v['title'],
-                        'strengthenSupplyExp' => $card['strengthenSupplyExp'],
+                        'title' => $ship->title,
+                        'strengthen_supply' => $card['strengthenSupplyExp'],
                         'dismantle' => $card['dismantle'],
                     ];
                 }
                 else {
-                    $list[$v['shipCid']]['count'] ++;
+                    $list[$ship->ship_cid]['count'] ++;
                 }
             }
         }
@@ -258,66 +216,29 @@ class PlayerInfo {
             return null;
         }
 
-        $fleet = $this->fleet_list[$id];
+        $fleet_info = $this->fleet_list[$id];
+
+        $fleet = new Fleet($id, $fleet_info['title']);
 
         $ship_list = [];
-        foreach ($fleet['ships'] as $k => $id) {
-            $ship_list[$k] = $this->get_ship_info($id);
-            $ship_list[$k]['indexInFleet'] = $k;
+        foreach ($fleet_info['ships'] as $k => $id) {
+            $ship_list[$k] = $this->ship_list[$id];
         }
-        $fleet['ships'] = $ship_list;
+        $fleet->set_ships($ship_list);
 
         return $fleet;
     }
 
-    public function get_ship_info($id) {
-        if (!isset($this->ship_list[$id])) {
-            return null;
-        }
-
-        $raw_info = $this->ship_list[$id];
-
-        $ship_info = $raw_info;
-
-        $tactics = [];
-        if (isset($this->tactics_list[$raw_info['id']])) {
-            $all_tactics = $this->tactics_list[$raw_info['id']];
-
-            foreach ($raw_info['tactics'] as $tcid) {
-                if ($tcid > 0) {
-                    $tactics[] = $all_tactics[$tcid];
-                    unset($all_tactics[$tcid]);
-                }
-            }
-
-            $ship_info['tactics'] = $tactics;
-            $ship_info['tactics_avl'] = [];
-
-            foreach ($all_tactics as $tid) {
-                $ship_info['tactics_avl'][] = $tid;
-            }
-        }
-        else {
-            $ship_info['tactics'] = [];
-            $ship_info['tactics_avl'] = [];
-        }
-
-        return $ship_info;
-    }
+    ///////////////////////////////////
+    protected $game_info;
 
     ///////////////////////////////////
-
-    protected static function get_battle_props($info) {
-        $ret = [];
-        foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
-            $ret[$k] = $info['battlePropsBasic'][$k];
-        }
-
-        foreach (\App\App::SHIP_RES_NAME as $k => $v) {
-            $ret[$k] = $info['battleProps'][$k];
-            $ret[$k . '_max'] = $info['battlePropsMax'][$k];
-        }
-        return $ret;
+    public function jsonSerialize() {
+        ksort($this->ship_list);
+        return [
+            'ship_list' => $this->ship_list,
+            'fleet_list' => $this->fleet_list,
+        ];
     }
 
 }

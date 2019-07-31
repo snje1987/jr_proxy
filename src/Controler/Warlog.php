@@ -102,15 +102,6 @@ class Warlog extends BaseControler {
 
         if (!$log->init($cur_file)) {
             $log = false;
-            $self_fleet = false;
-            $enemy_fleet = false;
-        }
-        else {
-            $self_fleet = new Model\Fleet();
-            $enemy_fleet = new Model\Fleet();
-
-            $self_fleet->set_ships($log->self_ships);
-            $enemy_fleet->set_ships($log->enemy_ships);
         }
 
         $this->display_tpl('warlog/index', [
@@ -118,9 +109,7 @@ class Warlog extends BaseControler {
             'file_list' => $file_list,
             'cur_file' => $cur_file,
             'log' => $log,
-            'path' => $path,
-            'self_fleet' => $self_fleet,
-            'enemy_fleet' => $enemy_fleet,
+            'path' => $path
         ]);
     }
 

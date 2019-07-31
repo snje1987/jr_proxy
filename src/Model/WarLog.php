@@ -9,8 +9,8 @@ class WarLog {
 
     public $self_ships = [];
     public $enemy_ships = [];
-    public $self_fleet = '';
-    public $enemy_fleet = '';
+    public $self_fleet;
+    public $enemy_fleet;
     public $buffs = [];
     public $explore_buff = [];
     public $war_type = [];
@@ -270,18 +270,8 @@ class WarLog {
         }
         $report = $this->raw_data['war_day']['warReport'];
 
-        //舰队信息
-        $this->self_ships = $this->get_ship_info($this->raw_data['fleet']);
-        $this->self_fleet = [
-            'title' => $report['selfFleet']['title'],
-            'formation' => self::FORMATION_NAME[$report['selfFleet']['formation']],
-        ];
-
-        $this->enemy_ships = $this->get_ship_info($report['enemyShips']);
-        $this->enemy_fleet = [
-            'title' => $report['enemyFleet']['title'],
-            'formation' => self::FORMATION_NAME[$report['enemyFleet']['formation']],
-        ];
+        $this->get_self_fleet();
+        $this->get_enemy_fleet();
 
         //buff信息
         $self_buffs = $this->get_buff_info($report['selfBuffs'], 1);
@@ -315,13 +305,13 @@ class WarLog {
 
         if (!empty($report['lockedTargetSelf'])) {
             foreach ($report['lockedTargetSelf'] as $index) {
-                $this->locked_ships[] = $this->get_self_ship_name($index);
+                $this->locked_ships[] = [1, $index];
             }
         }
 
         if (!empty($report['lockedTargetEnemy'])) {
             foreach ($report['lockedTargetEnemy'] as $index) {
-                $this->locked_ships[] = $this->get_enemy_ship_name($index);
+                $this->locked_ships[] = [2, $index];
             }
         }
 
@@ -382,16 +372,16 @@ class WarLog {
         $from = $info['fromIndex'];
 
         if ($info['attackSide'] == 1) {
-            $self_ship = 'self_ship';
-            $enemy_ship = 'enemy_ship';
+            $self_ship = 1;
+            $enemy_ship = 2;
         }
         else {
-            $self_ship = 'enemy_ship';
-            $enemy_ship = 'self_ship';
+            $self_ship = 2;
+            $enemy_ship = 1;
         }
 
         $attack = [
-            'from' => $this->{'get_' . $self_ship . '_name'}($from),
+            'from' => [$self_ship, $from],
             'attack' => [],
         ];
 
@@ -401,7 +391,6 @@ class WarLog {
                 $attack['skill'] = $skill;
             }
         }
-
 
         foreach ($info['targetIndex'] as $k => $target) {
             $raw_damage = $info['damages'][$k];
@@ -424,11 +413,11 @@ class WarLog {
             $helper = [];
             if (!empty($info['tmdDef'])) {
                 $defencer_index = $info['tmdDef'][0];
-                $defencer = $this->{'get_' . $enemy_ship . '_name'}($defencer_index);
+                $defencer = [$enemy_ship, $defencer_index];
             }
             elseif ($raw_damage['extraDefHelper'] >= 0 && $raw_damage['defType'] == 0) {
                 $helper_index = $raw_damage['extraDefHelper'];
-                $helper = $this->{'get_' . $enemy_ship . '_name'}($helper_index);
+                $helper = [$enemy_ship, $helper_index];
             }
 
             $damage = [
@@ -441,7 +430,7 @@ class WarLog {
                 'defencer' => $defencer,
                 'helper' => $helper,
             ];
-            $damage['target'] = $this->{'get_' . $enemy_ship . '_name'}($target);
+            $damage['target'] = [$enemy_ship, $target];
 
             $true_target = $damage['target'];
             if (!empty($damage['helper'])) {
@@ -458,29 +447,29 @@ class WarLog {
         $buffs = [];
 
         if ($type == 1) {
-            $self_ship_name = [$this, 'get_self_ship_name'];
-            $enemy_ship_name = [$this, 'get_enemy_ship_name'];
+            $self_ship = 1;
+            $enemy_ship = 2;
         }
         else {
-            $self_ship_name = [$this, 'get_enemy_ship_name'];
-            $enemy_ship_name = [$this, 'get_self_ship_name'];
+            $self_ship = 2;
+            $enemy_ship = 1;
         }
 
         foreach ($list as $v) {
             $cid = $v['buffCid'];
             $buff_card = $this->game_info->get_buff_card($cid);
 
-            $from = call_user_func($self_ship_name, $v['fromIndex']);
+            $from = [$self_ship, $v['fromIndex']];
 
             $to = [];
             if ($v['team'] == 1) {
                 foreach ($v['targetIndex'] as $index) {
-                    $to[] = call_user_func($self_ship_name, $index);
+                    $to[] = [$self_ship, $index];
                 }
             }
             else {
                 foreach ($v['targetIndex'] as $index) {
-                    $to[] = call_user_func($enemy_ship_name, $index);
+                    $to[] = [$enemy_ship, $index];
                 }
             }
 
@@ -500,46 +489,85 @@ class WarLog {
         return $buffs;
     }
 
-    protected function get_self_ship_name($index) {
-        if (isset($this->self_ships[$index])) {
-            return [1, $index];
-        }
-        return null;
-    }
+    protected function get_self_fleet() {
+        $report = $this->raw_data['war_day']['warReport'];
 
-    protected function get_enemy_ship_name($index) {
-        if (isset($this->enemy_ships[$index])) {
-            return [2, $index];
-        }
-        return null;
-    }
+        $title = $report['selfFleet']['title'];
+        $formation = self::FORMATION_NAME[$report['selfFleet']['formation']];
 
-    protected function get_ship_info($list) {
-        $ship_info = [];
+        $this->self_fleet = new Fleet(0, $title);
+        $this->self_fleet->formation = $formation;
 
-        foreach ($list as $info) {
-            $ship = $info;
+        $ship_list = [];
+        $this->self_ships = [];
 
-            if (isset($ship['hpMax'])) {
-                unset($ship['hpMax']);
-                $ship['hp_max'] = $info['hpMax'];
-            }
-            $ship['hp_left'] = $ship['hp'];
+        foreach ($this->raw_data['fleet'] as $info) {
+            try {
+                $ship = new Ship();
+                $ship->init_from_save($info);
 
-            if ($this->cfg_show_card_name) {
-                $ship_card = $this->game_info->get_ship_card($info['shipCid']);
-                if ($ship_card !== null) {
-                    $ship['title'] = $ship_card['title'];
+                $short_info = [
+                    'hp_left' => $ship->res['hp'],
+                    'hp_max' => $ship->res['hp_max'],
+                ];
+
+                if ($this->cfg_show_card_name) {
+                    $short_info['title'] = $ship->ori_title;
                 }
+                else {
+                    $short_info['title'] = $ship->title;
+                }
+
+                $ship_list[] = $ship;
+                $this->self_ships[] = $short_info;
+            }
+            catch (Exception $ex) {
+                
+            }
+        }
+
+        $this->self_fleet->set_ships($ship_list);
+    }
+
+    protected function get_enemy_fleet() {
+        $report = $this->raw_data['war_day']['warReport'];
+
+        $title = $report['enemyFleet']['title'];
+        $formation = self::FORMATION_NAME[$report['enemyFleet']['formation']];
+
+        $this->enemy_fleet = new Fleet(0, $title);
+        $this->enemy_fleet->formation = $formation;
+
+        $ship_list = [];
+        $this->enemy_ships = [];
+
+        foreach ($report['enemyShips'] as $info) {
+
+            $ship = new Ship();
+            $ship->init_from_warlog($info);
+
+            $short_info = [
+                'hp_left' => $ship->res['hp'],
+                'hp_max' => $ship->res['hp_max'],
+            ];
+
+            if ($this->cfg_show_card_name && !empty($ship->ori_title)) {
+                $short_info['title'] = $ship->ori_title;
+            }
+            else {
+                $short_info['title'] = $ship->title;
             }
 
             $index = $info['indexInFleet'];
-            $ship_info[$index] = $ship;
+
+            $ship_list[$index] = $ship;
+            $this->enemy_ships[$index] = $short_info;
         }
 
-        ksort($ship_info, SORT_NUMERIC);
+        ksort($ship_list, SORT_NUMERIC);
+        ksort($this->enemy_ships, SORT_NUMERIC);
 
-        return $ship_info;
+        $this->enemy_fleet->set_ships($ship_list);
     }
 
     //////////////////////////

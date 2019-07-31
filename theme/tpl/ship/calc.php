@@ -10,7 +10,7 @@
             $values = [];
 
             for ($j = 0; $j < 4; $j++) {
-                $points[$j] = $item['strengthenSupplyExp'][$point_attr[$j]];
+                $points[$j] = $item['strengthen_supply'][$point_attr[$j]];
                 $values[$j] = $item['dismantle'][$value_attr[$j]];
             }
             ?>

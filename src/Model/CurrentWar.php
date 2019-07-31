@@ -79,7 +79,7 @@ class CurrentWar {
 
         $fleet = $player_info->get_fleet($fleet_id);
         if ($fleet !== null) {
-            $this->fleet = $fleet['ships'];
+            $this->fleet = $fleet->get_ships();
         }
         else {
             throw new Exception();

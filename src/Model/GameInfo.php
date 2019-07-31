@@ -9,7 +9,7 @@ class GameInfo {
 
     const GAME_INFO_URL = 'http://login.jr.moefantasy.com:80/index/getInitConfigs/';
     const DATA_FILE = APP_DATA_DIR . '/game_info.json';
-    const VERSION = '1.0.3';
+    const VERSION = '1.0.4';
 
     protected $file;
     protected $data_version = '';
@@ -163,6 +163,7 @@ class GameInfo {
             $id = $ship['cid'];
 
             $this->ship_cards[$id] = [
+                'id' => $id,
                 'title' => $ship['title'],
                 'shipIndex' => $ship['shipIndex'], //图鉴编号
                 'evoClass' => $ship['evoClass'], //改造
@@ -189,6 +190,8 @@ class GameInfo {
         foreach ($list as $skill) {
             $id = $skill['skillId'];
             $this->skill_cards[$id] = [
+                'id' => $id,
+                'sid' => $skill['skillType'],
                 'title' => $skill['title'],
                 'level' => $skill['skillLevel'],
                 'desc' => self::clear_desc($skill['desc']),
@@ -201,6 +204,8 @@ class GameInfo {
         foreach ($list as $tactic) {
             $tid = $tactic['cid'];
             $this->tactics_cards[$tid] = [
+                'id' => $tid,
+                'tid' => $tactic['tacticsId'],
                 'title' => $tactic['title'],
                 'level' => $tactic['level'],
                 'desc' => self::clear_desc($tactic['desc']),
@@ -213,6 +218,7 @@ class GameInfo {
         foreach ($list as $buff) {
             $cid = $buff['cid'];
             $this->buff_cards[$cid] = [
+                'id' => $cid,
                 'title' => $buff['title'],
                 'level' => $buff['level'],
                 'desc' => self::clear_desc($buff['desc']),
@@ -223,6 +229,7 @@ class GameInfo {
     protected function build_equip_info($equip) {
         $info = [];
         $info['title'] = $equip['title'];
+        $info['id'] = $equip['cid'];
 
         $desc = [];
 
@@ -328,10 +335,6 @@ class GameInfo {
         'hit' => '命中',
         'airDef' => '对空',
         'aircraftAtk' => '轰炸',
-            //'correction' => 'correction',
-            //'country' => 'country',
-            //'author' => 'author',
-            //'missleDefModulus' => 'missleDefModulus',
     ];
     const EQUIP_RANGE_NAME = [
         0 => '未知',

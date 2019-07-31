@@ -34,7 +34,7 @@ class Calculator {
 
     public function cal($target_ship, $material) {
         foreach (self::POINTS_ATTRS as $k) {
-            $this->left_point[$k] = $target_ship['strengthenTop'][$k] - $target_ship['strengthenAttribute'][$k];
+            $this->left_point[$k] = $target_ship->strengthen_top[$k] - $target_ship->strengthen[$k];
             if ($this->left_point[$k] < 0) {
                 $this->left_point[$k] = 0;
             }
@@ -52,8 +52,8 @@ class Calculator {
             $point_sum = 0;
             $point_value = 0;
             foreach (self::POINTS_ATTRS as $i => $k) {
-                $point_sum += $info['strengthenSupplyExp'][$k];
-                $point_value += $info['strengthenSupplyExp'][$k] * $this->points[$i];
+                $point_sum += $info['strengthen_supply'][$k];
+                $point_value += $info['strengthen_supply'][$k] * $this->points[$i];
             }
 
             $material_value += $point_value;
@@ -98,8 +98,8 @@ class Calculator {
             $point_sum = 0;
             foreach (self::POINTS_ATTRS as $i => $k) {
                 //计算素材能给当前目标提供的强化点数之和
-                if ($info['strengthenSupplyExp'][$k] <= $this->left_point[$k]) {
-                    $point_sum += $info['strengthenSupplyExp'][$k];
+                if ($info['strengthen_supply'][$k] <= $this->left_point[$k]) {
+                    $point_sum += $info['strengthen_supply'][$k];
                 }
                 else {
                     $point_sum += ($this->left_point[$k] > 0 ? $this->left_point[$k] : 0);
@@ -142,12 +142,12 @@ class Calculator {
             foreach (self::POINTS_ATTRS as $k) {
                 //确定素材口感是否变化，如变化了就需要重新进行评分
                 if ($this->left_point[$k] > 0 &&
-                        $this->left_point[$k] < $info['strengthenSupplyExp'][$k] * 2) {
+                        $this->left_point[$k] < $info['strengthen_supply'][$k] * 2) {
                     $score_change = true;
                 }
 
                 //更新剩余强化点数
-                $this->left_point[$k] -= $info['strengthenSupplyExp'][$k];
+                $this->left_point[$k] -= $info['strengthen_supply'][$k];
             }
 
             if ($score_change) {
@@ -165,7 +165,7 @@ class Calculator {
             foreach ($this->used_ship as $cid => $info) {
                 $can_remove = true;
                 foreach (self::POINTS_ATTRS as $k) {
-                    if ($this->left_point[$k] + $info['strengthenSupplyExp'][$k] > 0) {
+                    if ($this->left_point[$k] + $info['strengthen_supply'][$k] > 0) {
                         $can_remove = false;
                         break;
                     }
@@ -185,7 +185,7 @@ class Calculator {
             }
 
             foreach (self::POINTS_ATTRS as $k) {
-                $this->left_point[$k] += $this->used_ship[$worst_cid]['strengthenSupplyExp'][$k];
+                $this->left_point[$k] += $this->used_ship[$worst_cid]['strengthen_supply'][$k];
             }
 
             if ($this->used_ship[$worst_cid]['count'] > 1) {
@@ -216,12 +216,12 @@ class Calculator {
             $list[$cid] = [
                 'title' => $info['title'],
                 'count' => $info['count'],
-                'strengthenSupplyExp' => $info['strengthenSupplyExp'],
+                'strengthen_supply' => $info['strengthen_supply'],
                 'dismantle' => $info['dismantle'],
             ];
 
             foreach (self::POINTS_ATTRS as $k) {
-                $sum_point[$k] += $info['strengthenSupplyExp'][$k] * $info['count'];
+                $sum_point[$k] += $info['strengthen_supply'][$k] * $info['count'];
             }
 
             foreach (self::VALUES_ATTRS as $name) {
