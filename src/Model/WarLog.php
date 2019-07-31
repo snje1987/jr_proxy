@@ -323,7 +323,11 @@ class WarLog {
         }
 
         foreach (self::ATTACK_NAMES as $k => $v) {
-            $this->{$k} = $this->get_attacks($report[$v]);
+            $merge_all = false;
+            if ($k == 'open_air_attack' || $k == 'open_torpedo_attack' || $k == 'close_torpedo_attack') {
+                $merge_all = true;
+            }
+            $this->{$k} = $this->get_attacks($report[$v], $merge_all);
         }
 
         if (isset($this->raw_data['war_result']) && isset($this->raw_data['war_result']['extraProgress']) && isset($this->raw_data['war_result']['extraProgress']['nightAttacks'])) {
@@ -331,9 +335,37 @@ class WarLog {
         }
     }
 
-    protected function get_attacks($list) {
+    protected function get_attacks($list, $merge_all) {
+        $attacks = [];
         foreach ($list as $v) {
-            $this->add_one_attack($v, $attacks);
+            $tmp = $this->add_one_attack($v);
+            $last = count($attacks) - 1;
+            if ($last >= 0 &&
+                    $tmp['from'][0] == $attacks[$last]['from'][0] &&
+                    $tmp['from'][1] == $attacks[$last]['from'][1]) {
+                foreach ($tmp['attack'] as $v) {
+                    $attacks[$last]['attack'][] = $v;
+                }
+            }
+            else {
+                $attacks[] = $tmp;
+            }
+        }
+
+        if ($merge_all) {
+            $ori_attacks = $attacks;
+            $attacks = [];
+            foreach ($ori_attacks as $v) {
+                $index = $v['from'][0] . '_' . $v['from'][1];
+                if (!isset($attacks[$index])) {
+                    $attacks[$index] = $v;
+                }
+                else {
+                    foreach ($v['attack'] as $v) {
+                        $attacks[$index]['attack'][] = $v;
+                    }
+                }
+            }
         }
 
         if (empty($attacks)) {
@@ -343,42 +375,39 @@ class WarLog {
         return $attacks;
     }
 
-    protected function add_one_attack($info, &$attacks) {
+    protected function add_one_attack($info) {
         $from = $info['fromIndex'];
 
         if ($info['attackSide'] == 1) {
-            $prefix = '1_';
             $self_ship = 'self_ship';
             $enemy_ship = 'enemy_ship';
         }
         else {
-            $prefix = '2_';
             $self_ship = 'enemy_ship';
             $enemy_ship = 'self_ship';
         }
 
-        if (!isset($attacks[$prefix . $from])) {
-            $attacks[$prefix . $from] = [
-                'from' => $this->{'get_' . $self_ship . '_name'}($from),
-                'attack' => [],
-            ];
+        $attack = [
+            'from' => $this->{'get_' . $self_ship . '_name'}($from),
+            'attack' => [],
+        ];
 
-            if ($info['skillId'] != 0) {
-                $skill = $this->game_info->get_skill_card($info['skillId']);
-                if ($skill !== null) {
-                    $attacks[$prefix . $from]['skill'] = $skill;
-                }
+        if ($info['skillId'] != 0) {
+            $skill = $this->game_info->get_skill_card($info['skillId']);
+            if ($skill !== null) {
+                $attack['skill'] = $skill;
             }
         }
 
-        foreach ($info['targetIndex'] as $k => $target) {
-            $damage = $info['damages'][$k];
 
-            $amount = $damage['amount'];
+        foreach ($info['targetIndex'] as $k => $target) {
+            $raw_damage = $info['damages'][$k];
+
+            $amount = $raw_damage['amount'];
             $extra = [];
-            if ($damage['extraDef'] != 0) {
-                $amount = $amount - $damage['extraDef'];
-                $extra[] = '-' . $damage['extraDef'];
+            if ($raw_damage['extraDef'] != 0) {
+                $amount = $amount - $raw_damage['extraDef'];
+                $extra[] = '-' . $raw_damage['extraDef'];
             }
 
             if (!empty($extra)) {
@@ -394,30 +423,32 @@ class WarLog {
                 $defencer_index = $info['tmdDef'][0];
                 $defencer = $this->{'get_' . $enemy_ship . '_name'}($defencer_index);
             }
-            elseif ($damage['extraDefHelper'] >= 0 && $damage['defType'] == 0) {
-                $helper_index = $damage['extraDefHelper'];
+            elseif ($raw_damage['extraDefHelper'] >= 0 && $raw_damage['defType'] == 0) {
+                $helper_index = $raw_damage['extraDefHelper'];
                 $helper = $this->{'get_' . $enemy_ship . '_name'}($helper_index);
             }
 
-            $attack = [
+            $damage = [
                 'damage' => $amount,
                 'extra' => $extra_str,
-                'critical' => $damage['isCritical'],
+                'critical' => $raw_damage['isCritical'],
                 'amount' => $info['planeAmount'],
                 'drop' => $info['dropAmount'],
                 'plane_type' => $info['planeType'],
                 'defencer' => $defencer,
                 'helper' => $helper,
             ];
-            $attack['target'] = $this->{'get_' . $enemy_ship . '_name'}($target);
+            $damage['target'] = $this->{'get_' . $enemy_ship . '_name'}($target);
 
-            $true_target = $attack['target'];
-            if (!empty($attack['helper'])) {
-                $true_target = $attack['helper'];
+            $true_target = $damage['target'];
+            if (!empty($damage['helper'])) {
+                $true_target = $damage['helper'];
             }
 
-            $attacks[$prefix . $from]['attack'][] = $attack;
+            $attack['attack'][] = $damage;
         }
+
+        return $attack;
     }
 
     protected function get_buff_info($list, $type) {
