@@ -89,32 +89,49 @@ class PlayerInfo {
 
     public function set_ship($info) {
         $id = $info['id'];
-        $ship = [
-            'id' => $id,
-            'title' => $info['title'], //名称
-            'level' => $info['level'], //等级
-            'shipCid' => $info['shipCid'], //CID
-            'isLocked' => $info['isLocked'], //是否锁定
-            'type' => $info['type'], //类型
-            'love' => $info['love'], //好感
-            'married' => $info['married'], //婚否
-            'strengthenAttribute' => $info['strengthenAttribute'], //强化情况
-            'equipment' => $info['equipment'], //装备
-            'capacitySlot' => $info['capacitySlot'], //当前飞机搭载数
-            'capacitySlotMax' => $info['capacitySlotMax'], //当前飞机搭载数
-            'capacitySlotExist' => $info['capacitySlotExist'], //当前飞机搭载数
-            'missileSlot' => $info['missileSlot'], //导弹搭载数
-            'missileSlotMax' => $info['missileSlotMax'], //导弹搭载数
-            'missileSlotExist' => $info['missileSlotExist'], //导弹搭载数
-            'tactics' => $info['tactics'],
-            'battleProps' => self::get_battle_props($info), //战斗属性
+
+        $ship = self::get_battle_props($info);
+
+        $attrs = [
+            'id', 'title', 'level', 'shipCid', 'isLocked',
+            'type', 'love', 'married', 'strengthenAttribute', 'equipment',
+            'capacitySlot', 'capacitySlotMax', 'capacitySlotExist', 'missileSlot', 'missileSlotMax',
+            'missileSlotExist', 'tactics', 'skillId',
         ];
-        if (isset($info['skillId'])) {
-            $ship['skillId'] = $info['skillId']; //技能ID
+
+        foreach ($attrs as $v) {
+            if (isset($info[$v])) {
+
+                $ship[$v] = $info[$v];
+            }
+            else {
+                $ship[$v] = 0;
+            }
         }
-        else {
-            $ship['skillId'] = 0;
+
+        $this->ship_list[$id] = $ship;
+
+        return $this;
+    }
+
+    public function update_ships_res($list) {
+        foreach ($list as $v) {
+            $this->update_ship_res($v);
         }
+        return $this;
+    }
+
+    public function update_ship_res($info) {
+        $id = $info['id'];
+        if (!isset($this->ship_list[$id])) {
+            return $this;
+        }
+        $ship = $this->ship_list[$id];
+
+        $ship['oil'] = $info['oil'];
+        $ship['ammo'] = $info['ammo'];
+        $ship['capacitySlot'] = $info['capacitySlot'];
+        $ship['missileSlot'] = $info['missileSlot'];
 
         $this->ship_list[$id] = $ship;
 
@@ -237,10 +254,20 @@ class PlayerInfo {
     }
 
     public function get_fleet($id) {
-        if (isset($this->fleet_list[$id])) {
-            return $this->fleet_list[$id];
+        if (!isset($this->fleet_list[$id])) {
+            return null;
         }
-        return null;
+
+        $fleet = $this->fleet_list[$id];
+
+        $ship_list = [];
+        foreach ($fleet['ships'] as $k => $id) {
+            $ship_list[$k] = $this->get_ship_info($id);
+            $ship_list[$k]['indexInFleet'] = $k;
+        }
+        $fleet['ships'] = $ship_list;
+
+        return $fleet;
     }
 
     public function get_ship_info($id) {
@@ -251,12 +278,6 @@ class PlayerInfo {
         $raw_info = $this->ship_list[$id];
 
         $ship_info = $raw_info;
-
-        unset($ship_info['battleProps']);
-
-        foreach ($raw_info['battleProps'] as $k => $v) {
-            $ship_info[$k] = $v;
-        }
 
         $tactics = [];
         if (isset($this->tactics_list[$raw_info['id']])) {
@@ -289,15 +310,12 @@ class PlayerInfo {
     protected static function get_battle_props($info) {
         $ret = [];
         foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
-            if ($k == 'hpMax') {
-                $ret[$k] = $info['battlePropsBasic']['hp'];
-            }
-            elseif($k == 'hp'){
-                $ret[$k] = $info['battleProps']['hp'];
-            }
-            else {
-                $ret[$k] = $info['battlePropsBasic'][$k];
-            }
+            $ret[$k] = $info['battlePropsBasic'][$k];
+        }
+
+        foreach (\App\App::SHIP_RES_NAME as $k => $v) {
+            $ret[$k] = $info['battleProps'][$k];
+            $ret[$k . '_max'] = $info['battlePropsMax'][$k];
         }
         return $ret;
     }

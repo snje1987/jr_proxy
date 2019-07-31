@@ -105,19 +105,13 @@ class Ship extends BaseControler {
 
         $fleet_list = $play_info->get_fleet_list();
 
-        $ship_list = [];
-
+        $fleet = null;
         if ($cur_fleet > 0) {
             $fleet_info = $play_info->get_fleet($cur_fleet);
-            if ($fleet_info !== null) {
-                foreach ($fleet_info['ships'] as $id) {
-                    $ship_list[] = $play_info->get_ship_info($id);
-                }
-            }
+            $fleet = new Fleet();
+            $fleet->set_ships($fleet_info['ships']);
         }
-        
-        $fleet = new Fleet();
-        $fleet->set_ships($ship_list);
+
 
         $this->display_tpl('ship/fleet', [
             'cur_fleet' => $cur_fleet,

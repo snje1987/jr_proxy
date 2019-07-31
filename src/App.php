@@ -151,8 +151,6 @@ class App {
         ],
     ];
     const SHIP_BATTLE_PROP_NAME = [
-        'hp' => '耐久',
-        'hpMax' => '最大耐久',
         'atk' => '火力',
         'def' => '装甲',
         'torpedo' => '鱼雷',
@@ -164,6 +162,11 @@ class App {
         'range' => '射程',
         'luck' => '幸运',
         'hit' => '命中',
+    ];
+    const SHIP_RES_NAME = [
+        'hp' => '耐久',
+        'ammo' => '弹药',
+        'oil' => '燃料',
     ];
     const EQUIP_PROP_NAME = [
         'hp' => '耐久',

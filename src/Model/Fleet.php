@@ -157,21 +157,25 @@ class Fleet {
                     if (!isset($equip[$k]) || !isset($result[$k]) || $k == 'range') {
                         continue;
                     }
-                    if ($k == 'hp') {
-                        if (!is_array($result['hpMax'])) {
-                            $result['hpMax'] = [$result['hpMax'], $equip['hp']];
-                        }
-                        else {
-                            $result['hpMax'][1] += $equip['hp'];
-                        }
+
+                    if (!is_array($result[$k])) {
+                        $result[$k] = [$result[$k], $equip[$k]];
                     }
                     else {
-                        if (!is_array($result[$k])) {
-                            $result[$k] = [$result[$k], $equip[$k]];
-                        }
-                        else {
-                            $result[$k][1] += $equip[$k];
-                        }
+                        $result[$k][1] += $equip[$k];
+                    }
+                }
+
+                foreach (\App\App::SHIP_RES_NAME as $k => $v) {
+                    if (!isset($equip[$k]) || !isset($result[$k])) {
+                        continue;
+                    }
+
+                    if (!is_array($result[$k . '_max'])) {
+                        $result[$k . '_max'] = [$result[$k . '_max'], $equip[$k]];
+                    }
+                    else {
+                        $result[$k . '_max'][1] += $equip[$k];
                     }
                 }
             }

@@ -11,6 +11,7 @@ class CurrentWar {
     protected $war_spy;
     protected $war_day;
     protected $war_result;
+    protected $fleet;
     protected $type;
     protected $name;
     protected $uid;
@@ -32,6 +33,7 @@ class CurrentWar {
         $data = [
             'type' => $this->type,
             'name' => $this->name,
+            'fleet' => $this->fleet,
             'war_spy' => $this->war_spy,
             'war_day' => $this->war_day,
             'war_result' => $this->war_result,
@@ -56,6 +58,7 @@ class CurrentWar {
         $this->war_spy = isset($data['war_spy']) ? $data['war_spy'] : [];
         $this->war_day = isset($data['war_day']) ? $data['war_day'] : [];
         $this->war_result = isset($data['war_result']) ? $data['war_result'] : [];
+        $this->fleet = isset($data['fleet']) ? $data['fleet'] : [];
         $this->type = isset($data['type']) ? strval($data['type']) : '';
         $this->name = isset($data['name']) ? strval($data['name']) : '';
         return $this;
@@ -67,6 +70,21 @@ class CurrentWar {
     }
 
     public function set_day($data) {
+        if (!isset($data['warReport']) || !isset($data['warReport']['selfFleet'])) {
+            throw new Exception();
+        }
+
+        $fleet_id = $data['warReport']['selfFleet']['id'];
+        $player_info = new PlayerInfo($this->uid);
+
+        $fleet = $player_info->get_fleet($fleet_id);
+        if ($fleet !== null) {
+            $this->fleet = $fleet['ships'];
+        }
+        else {
+            throw new Exception();
+        }
+
         $this->war_day = $data;
         return $this;
     }
@@ -97,6 +115,7 @@ class CurrentWar {
         $data = [
             'type' => $this->type,
             'version' => LogUpgrader::VERSION,
+            'fleet' => $this->fleet,
             'war_spy' => $this->war_spy,
             'war_day' => $this->war_day,
             'war_result' => $this->war_result,
@@ -106,6 +125,7 @@ class CurrentWar {
 
         file_put_contents($file, $json);
 
+        $this->fleet = [];
         $this->war_spy = [];
         $this->war_day = [];
         $this->war_result = [];

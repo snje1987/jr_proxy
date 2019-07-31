@@ -58,6 +58,9 @@ class Warlog extends BaseControler {
                 $dir_list[$v] = $dir . $v;
             }
             else {
+                if (substr($v, -5) !== '.json') {
+                    continue;
+                }
                 $file_list[$v] = $dir . $v;
             }
         }

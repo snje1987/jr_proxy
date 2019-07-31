@@ -7,7 +7,7 @@ use Exception;
 class LogUpgrader {
 
     const MIN_VERSION = '1.0.0';
-    const VERSION = '1.0.1';
+    const VERSION = '1.0.2';
 
     public static function upgrade($file, $raw_data) {
 
@@ -28,6 +28,7 @@ class LogUpgrader {
         }
 
         $json = json_encode($raw_data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        copy($file, $file . '.bak');
         file_put_contents($file, $json);
 
         return $raw_data;

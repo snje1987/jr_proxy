@@ -208,7 +208,7 @@ class WarLog {
         $str = '<span class="btn btn-primary">' . $ship[1] . '</span><span class="btn btn-' . $class . '" btn-xs>' . $ship_info['title'] . '</span>';
 
         if ($ship_info['hp_left'] > 0) {
-            $str .= '<span class="btn btn-info" style="color:black;min-width:70px;text-align:right;">' . $ship_info['hp_left'] . '/' . $ship_info['hpMax'] . '</span>';
+            $str .= '<span class="btn btn-info" style="color:black;min-width:70px;text-align:right;">' . $ship_info['hp_left'] . '/' . $ship_info['hp_max'] . '</span>';
         }
         else {
             $str .= '<span class="btn btn-warning" style="color:black;min-width:70px;text-align:center;">击沉</span>';
@@ -259,6 +259,9 @@ class WarLog {
     protected $game_info;
 
     protected function decode() {
+        if (!isset($this->raw_data['fleet'])) {
+            throw new Exception();
+        }
         if (!isset($this->raw_data['war_day'])) {
             throw new Exception();
         }
@@ -268,7 +271,7 @@ class WarLog {
         $report = $this->raw_data['war_day']['warReport'];
 
         //舰队信息
-        $this->self_ships = $this->get_ship_info($report['selfShips']);
+        $this->self_ships = $this->get_ship_info($this->raw_data['fleet']);
         $this->self_fleet = [
             'title' => $report['selfFleet']['title'],
             'formation' => self::FORMATION_NAME[$report['selfFleet']['formation']],
@@ -331,7 +334,7 @@ class WarLog {
         }
 
         if (isset($this->raw_data['war_result']) && isset($this->raw_data['war_result']['extraProgress']) && isset($this->raw_data['war_result']['extraProgress']['nightAttacks'])) {
-            $this->night_attack = $this->get_attacks($this->raw_data['war_result']['extraProgress']['nightAttacks']);
+            $this->night_attack = $this->get_attacks($this->raw_data['war_result']['extraProgress']['nightAttacks'], false);
         }
     }
 
@@ -517,6 +520,10 @@ class WarLog {
         foreach ($list as $info) {
             $ship = $info;
 
+            if (isset($ship['hpMax'])) {
+                unset($ship['hpMax']);
+                $ship['hp_max'] = $info['hpMax'];
+            }
             $ship['hp_left'] = $ship['hp'];
 
             if ($this->cfg_show_card_name) {
@@ -564,18 +571,6 @@ class WarLog {
         'miss' => 'miss',
         'airDef' => 'airDef',
         'speed' => 'speed',
-    ];
-    const SHIP_ATTR_NAME = [
-        'hp' => '耐久',
-        'hpMax' => '最大耐久',
-        'atk' => '火力',
-        'def' => '装甲',
-        'torpedo' => '鱼雷',
-        'antisub' => '对潜',
-        'radar' => '索敌',
-        'miss' => '回避',
-        'airDef' => '对空',
-        'speed' => '航速',
     ];
 
 }

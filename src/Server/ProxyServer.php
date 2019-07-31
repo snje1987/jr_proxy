@@ -33,19 +33,23 @@ class ProxyServer {
             $api_obj = BaseJrApi::create($client->request);
 
             if ($api_obj !== null) {
-                $response = $api_obj->before();
+                try {
+                    $response = $api_obj->before();
+                    if ($response !== null) {
+                        $info = '[HOOK] ' . $client->request->get_info();
+                        $info .= ' ' . $response->get_info() . "\n";
+                        echo $info;
 
-                if ($response !== null) {
-                    $info = '[HOOK] ' . $client->request->get_info();
-                    $info .= ' ' . $response->get_info() . "\n";
-                    echo $info;
+                        $client->send($response->get_response());
+                        $client->close();
+                        return;
+                    }
 
-                    $client->send($response->get_response());
-                    $client->close();
-                    return;
+                    $client->api_obj = $api_obj;
                 }
-
-                $client->api_obj = $api_obj;
+                catch (Exception $ex) {
+                    
+                }
             }
 
             $remote = new AsyncTcpConnection("tcp://" . $client->request->get_addr());
@@ -83,7 +87,12 @@ class ProxyServer {
         $response_http_data = $response->get_http_data();
         if ($response_http_data['code'] == 200) {
             if (isset($client->api_obj)) {
-                $client->api_obj->after($response);
+                try {
+                    $client->api_obj->after($response);
+                }
+                catch (Exception $ex) {
+                    
+                }
             }
         }
 
