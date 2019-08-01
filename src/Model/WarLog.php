@@ -199,9 +199,9 @@ class WarLog {
             $str = '<span class="btn btn-primary">鱼雷机</span>';
         }
 
-        $str .= '<span class="btn btn-info" style="color:black;min-width:40px;">' . $damage['drop'] . '/' . $damage['amount'] . '</span>';
+        $str .= '<span class="btn btn-info" style="color:black;min-width:50px;">' . $damage['drop'] . '/' . $damage['amount'] . '</span>';
 
-        
+
 
         return '<div class="btn-group btn-group-xs">' . $str . '</div>';
     }
@@ -221,10 +221,23 @@ class WarLog {
         $str = '<span class="btn btn-primary">' . $ship[1] . '</span><span class="btn btn-' . $class . '" btn-xs>' . $ship_info['title'] . '</span>';
 
         if ($ship_info['hp_left'] > 0) {
-            $str .= '<span class="btn btn-info" style="color:black;min-width:70px;text-align:right;">' . $ship_info['hp_left'] . '/' . $ship_info['hp_max'] . '</span>';
+            if ($ship_info['hp_left'] * 2 >= $ship_info['hp_max']) {
+                $btn = 'info';
+                $color = 'black';
+            }
+            elseif ($ship_info['hp_left'] * 4 >= $ship_info['hp_max']) {
+                $btn = 'warning';
+                $color = 'black';
+            }
+            else {
+                $btn = 'warning';
+                $color = 'red';
+            }
+
+            $str .= '<span class="btn btn-' . $btn . '" style="color:' . $color . ';min-width:60px;text-align:right;">' . $ship_info['hp_left'] . '/' . $ship_info['hp_max'] . '</span>';
         }
         else {
-            $str .= '<span class="btn btn-warning" style="color:black;min-width:70px;text-align:center;">击沉</span>';
+            $str .= '<span class="btn btn-warning" style="color:red;min-width:60px;text-align:center;">击沉</span>';
         }
 
         return '<div class="btn-group btn-group-xs">' . $str . '</div>';
