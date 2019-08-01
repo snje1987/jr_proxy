@@ -59,7 +59,7 @@ $ship_info = $ship->get_ship_card();
             ?>
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary"><?= $name ?></span>
-                <span class="btn btn-info" style="color:black;min-width:90px;text-align:right;">
+                <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;">
                     <?= $ship_info[$k] ?>/<?= is_array($ship_info[$k . '_max']) ? $ship_info[$k . '_max'][0] . '+' . $ship_info[$k . '_max'][1] . '=' . ($ship_info[$k . '_max'][0] + $ship_info[$k . '_max'][1]) : $ship_info[$k . '_max'] ?>
                 </span>
             </div>
@@ -72,7 +72,7 @@ $ship_info = $ship->get_ship_card();
             ?>
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary"><?= $name ?></span>
-                <span class="btn btn-info" style="color:black;min-width:90px;text-align:right;">
+                <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;">
                     <?= is_array($ship_info[$k]) ? $ship_info[$k][0] . '+' . $ship_info[$k][1] . '=' . ($ship_info[$k][0] + $ship_info[$k][1]) : $ship_info[$k] ?>
                 </span>
             </div>

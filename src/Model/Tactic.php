@@ -4,13 +4,13 @@ namespace App\Model;
 
 use Exception;
 
-abstract class Skill {
+abstract class Tactic {
 
-    public static function get_skill($skill) {
-        $skill_id = $skill['sid'];
-        $level = $skill['level'];
+    public static function get_tactic($tactic_info) {
+        $tactic_id = $tactic_info['tid'];
+        $level = $tactic_info['level'];
 
-        $class = __NAMESPACE__ . '\\Skill\\Skill_' . $skill_id;
+        $class = __NAMESPACE__ . '\\Tactic\\Tactic_' . $tactic_id;
         if (class_exists($class)) {
             return new $class($level);
         }
@@ -24,10 +24,7 @@ abstract class Skill {
     }
 
     /**
-     * 根据技能更新船只的战斗属性
-     * @param int $from_index
-     * @param Fleet $self_fleet
-     * @param Fleet $enemy_fleet
+     * 根据战术更新船只的战斗属性
      */
     abstract public function apply($from_index, $self_fleet, $enemy_fleet = null);
 }

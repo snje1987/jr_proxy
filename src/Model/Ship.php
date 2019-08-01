@@ -24,6 +24,8 @@ class Ship implements JsonSerializable {
     protected $tacitcs_in_use = [];
     protected $skill = [];
     /////////////////
+    protected $skill_buff = [];
+    protected $equip_buff = [];
     protected $ori_title;
     protected $country;
     protected $strengthen_top = [];
@@ -66,6 +68,8 @@ class Ship implements JsonSerializable {
 
         $this->init_battle_props($ship_info);
         $this->init_equip($ship_info);
+
+        $this->calc_equip_buff();
     }
 
     public function init_from_save($ship_info) {
@@ -107,6 +111,8 @@ class Ship implements JsonSerializable {
                 }
             }
         }
+
+        $this->calc_equip_buff();
     }
 
     public function init_from_warlog($ship_info) {
@@ -132,7 +138,7 @@ class Ship implements JsonSerializable {
             if ($cid > 0) {
                 $card = self::$game_info->get_tactics_card($cid);
                 $this->tactics[$card['tid']] = $card;
-                $this->tacitcs_in_use = $card['tid'];
+                $this->tacitcs_in_use[] = $card['tid'];
             }
         }
 
@@ -144,6 +150,8 @@ class Ship implements JsonSerializable {
         }
 
         $this->init_equip($ship_info);
+
+        $this->calc_equip_buff();
     }
 
     public function update_res($info) {
@@ -217,38 +225,46 @@ class Ship implements JsonSerializable {
                 $result['tactics'][$tid]['in_use'] = true;
             }
         }
-
-        foreach ($this->equipment as $equip) {
-            if ($equip !== null) {
-                foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
-                    if (!isset($equip[$k]) || !isset($result[$k]) || $k == 'range') {
-                        continue;
-                    }
-
-                    if (!is_array($result[$k])) {
-                        $result[$k] = [$result[$k], $equip[$k]];
-                    }
-                    else {
-                        $result[$k][1] += $equip[$k];
-                    }
-                }
-
-                foreach (\App\App::SHIP_RES_NAME as $k => $v) {
-                    if (!isset($equip[$k]) || !isset($result[$k])) {
-                        continue;
-                    }
-
-                    if (!is_array($result[$k . '_max'])) {
-                        $result[$k . '_max'] = [$result[$k . '_max'], $equip[$k]];
-                    }
-                    else {
-                        $result[$k . '_max'][1] += $equip[$k];
-                    }
-                }
-            }
+        
+        foreach ($this->battle_props as $k => $v){
+            $result[$k] = $this->get_battle_prop($k);
         }
 
         return $result;
+    }
+
+    public function get_tactics_in_use() {
+        $result = [];
+        foreach ($this->tacitcs_in_use as $tid) {
+            if ($tid > 0) {
+                $result[$tid] = $this->tactics[$tid];
+            }
+        }
+        return $result;
+    }
+
+    public function add_skill_buff($name, $value) {
+        if (!isset($this->skill_buff[$name])) {
+            $this->skill_buff[$name] = 0;
+        }
+        $this->skill_buff[$name] += $value;
+    }
+
+    public function get_battle_prop($name) {
+        if (!isset($this->battle_props[$name])) {
+            return null;
+        }
+        $base = $this->battle_props[$name];
+        
+        if (isset($this->equip_buff[$name])) {
+            $base += $this->equip_buff[$name];
+        }
+
+        if (isset($this->skill_buff[$name])) {
+            $base += $this->skill_buff[$name];
+        }
+
+        return $base;
     }
 
     /////////////////////////////////////////
@@ -328,6 +344,25 @@ class Ship implements JsonSerializable {
         }
 
         ksort($this->equipment, SORT_NUMERIC);
+    }
+
+    protected function calc_equip_buff() {
+        foreach ($this->equipment as $equip) {
+            if ($equip !== null) {
+                foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
+                    if (!isset($equip[$k]) || !isset($this->battle_props[$k]) || $k == 'range') {
+                        continue;
+                    }
+
+                    if (!isset($this->equip_buff[$k])) {
+                        $this->equip_buff[$k] = $equip[$k];
+                    }
+                    else {
+                        $this->equip_buff[$k] += $equip[$k];
+                    }
+                }
+            }
+        }
     }
 
     /////////////////////////////////////////

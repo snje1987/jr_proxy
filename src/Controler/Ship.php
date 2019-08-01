@@ -108,6 +108,8 @@ class Ship extends BaseControler {
         $fleet = null;
         if ($cur_fleet > 0) {
             $fleet = $play_info->get_fleet($cur_fleet);
+            $fleet->apply_skill();
+            $fleet->apply_tactic();
         }
 
         $this->display_tpl('ship/fleet', [

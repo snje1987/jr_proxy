@@ -84,8 +84,11 @@ class WarLog {
             foreach ($attack['attack'] as $damage) {
 
                 $str .= $this->show_drop($damage) . ' ';
-                $str .= $this->show_damage($damage);
-                $str .= ' 目标 ' . $this->attack_ship($damage['target'], $damage['damage']);
+
+                if ($damage['plane_type'] != 5) {
+                    $str .= $this->show_damage($damage);
+                    $str .= ' 目标 ' . $this->attack_ship($damage['target'], $damage['damage']);
+                }
 
                 $str .= '<br />';
             }
@@ -186,9 +189,19 @@ class WarLog {
     }
 
     public function show_drop($damage) {
-        $str = '<span class="btn btn-primary">击坠</span>';
+        if ($damage['plane_type'] == 5) {
+            $str = '<span class="btn btn-primary">战斗机</span>';
+        }
+        elseif ($damage['plane_type'] == 6) {
+            $str = '<span class="btn btn-primary">轰炸机</span>';
+        }
+        else {
+            $str = '<span class="btn btn-primary">鱼雷机</span>';
+        }
 
-        $str .= '<span class="btn btn-info" style="color:black;">' . $damage['drop'] . '/' . $damage['amount'] . '</span>';
+        $str .= '<span class="btn btn-info" style="color:black;min-width:40px;">' . $damage['drop'] . '/' . $damage['amount'] . '</span>';
+
+        
 
         return '<div class="btn-group btn-group-xs">' . $str . '</div>';
     }
@@ -413,7 +426,9 @@ class WarLog {
             $helper = [];
             if (!empty($info['tmdDef'])) {
                 $defencer_index = $info['tmdDef'][0];
-                $defencer = [$enemy_ship, $defencer_index];
+                if ($defencer_index > 0) {
+                    $defencer = [$enemy_ship, $defencer_index];
+                }
             }
             elseif ($raw_damage['extraDefHelper'] >= 0 && $raw_damage['defType'] == 0) {
                 $helper_index = $raw_damage['extraDefHelper'];
@@ -551,10 +566,10 @@ class WarLog {
                 'hp_max' => $ship->res['hp_max'],
             ];
 
-            if ($this->cfg_show_card_name && !empty($ship->ori_title)) {
+            if ($this->cfg_show_card_name) {
                 $short_info['title'] = $ship->ori_title;
             }
-            else {
+            if (empty($short_info['title'])) {
                 $short_info['title'] = $ship->title;
             }
 

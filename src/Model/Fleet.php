@@ -9,6 +9,10 @@ class Fleet {
 
     protected $id;
     protected $title;
+
+    /**
+     * @var Ship[] 
+     */
     protected $ships;
     //////////////////////////
 
@@ -40,8 +44,18 @@ class Fleet {
         $this->ships = $ships;
     }
 
+    /**
+     * @return Ship[]
+     */
     public function get_ships() {
         return $this->ships;
+    }
+
+    public function get_ship($index) {
+        if (isset($this->ships[$index])) {
+            return $this->ships[$index];
+        }
+        return null;
     }
 
     public function get_fleet_card() {
@@ -49,23 +63,60 @@ class Fleet {
             return [];
         }
         $result = [];
+        $result['speed'] = $this->calc_fleet_speed();
+
+        return $result;
+    }
+
+    public function apply_skill($enemy_fleet = null) {
+        foreach ($this->ships as $index => $ship) {
+            $skill_info = $ship->skill;
+            if (!empty($skill_info)) {
+                $skill = Skill::get_skill($skill_info);
+                if ($skill !== null) {
+                    $skill->apply($index, $this, $enemy_fleet);
+                }
+            }
+        }
+    }
+
+    public function apply_tactic($enemy_fleet = null) {
+        foreach ($this->ships as $index => $ship) {
+            $tactics_in_use = $ship->get_tactics_in_use();
+            foreach ($tactics_in_use as $tid => $tactic_info) {
+                $tactic = Tactic::get_tactic($tactic_info);
+                if ($tactic !== null) {
+                    $tactic->apply($index, $this, $enemy_fleet);
+                }
+            }
+        }
+    }
+
+    /////////////////////
+    protected $game_info;
+
+    protected function calc_fleet_speed() {
+        $result = [];
 
         $result['count'] = count($this->ships);
-        $result['speed_flag_ship'] = $this->ships[0]->battle_props['speed'];
-        $result['speed_max'] = $this->ships[0]->battle_props['speed'];
-        $result['speed_min'] = $this->ships[0]->battle_props['speed'];
+
+        $result['speed_flag_ship'] = $this->ships[0]->get_battle_prop('speed');
+        $result['speed_max'] = $result['speed_flag_ship'];
+        $result['speed_min'] = $result['speed_flag_ship'];
         $result['speed_sum'] = 0;
 
         $group_speed = [];
 
         foreach ($this->ships as $ship) {
-            if ($ship->battle_props['speed'] > $result['speed_max']) {
-                $result['speed_max'] = $ship->battle_props['speed'];
+            $speed = $ship->get_battle_prop('speed');
+
+            if ($speed > $result['speed_max']) {
+                $result['speed_max'] = $speed;
             }
-            if ($ship->battle_props['speed'] < $result['speed_min']) {
-                $result['speed_min'] = $ship->battle_props['speed'];
+            if ($speed < $result['speed_min']) {
+                $result['speed_min'] = $speed;
             }
-            $result['speed_sum'] += $ship->battle_props['speed'];
+            $result['speed_sum'] += $speed;
 
             if (isset(\App\App::SHIP_TYPE_HASH[$ship->type])) {
                 $type = \App\App::SHIP_TYPE_HASH[$ship->type];
@@ -81,7 +132,7 @@ class Fleet {
                 }
 
                 $group_speed[$type['group']]['count'] ++;
-                $group_speed[$type['group']]['speed_sum'] += $ship->battle_props['speed'];
+                $group_speed[$type['group']]['speed_sum'] += $speed;
             }
         }
         $result['speed_avg'] = round($result['speed_sum'] / $result['count'], 2);
@@ -109,8 +160,5 @@ class Fleet {
 
         return $result;
     }
-
-    /////////////////////
-    protected $game_info;
 
 }
