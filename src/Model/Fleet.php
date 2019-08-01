@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Exception;
 use App\Model\CurrentWar;
+use App\App;
 
 class Fleet {
 
@@ -100,7 +101,7 @@ class Fleet {
 
         $result['count'] = count($this->ships);
 
-        $result['speed_flag_ship'] = $this->ships[0]->get_battle_prop('speed');
+        $result['speed_flag_ship'] = $this->ships[0]->get_battle_prop(App::BATTLE_PROP_SPEED);
         $result['speed_max'] = $result['speed_flag_ship'];
         $result['speed_min'] = $result['speed_flag_ship'];
         $result['speed_sum'] = 0;
@@ -108,7 +109,7 @@ class Fleet {
         $group_speed = [];
 
         foreach ($this->ships as $ship) {
-            $speed = $ship->get_battle_prop('speed');
+            $speed = $ship->get_battle_prop(App::BATTLE_PROP_SPEED);
 
             if ($speed > $result['speed_max']) {
                 $result['speed_max'] = $speed;

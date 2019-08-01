@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Exception;
 use JsonSerializable;
+use App\App;
 
 class Ship implements JsonSerializable {
 
@@ -208,7 +209,7 @@ class Ship implements JsonSerializable {
             $result[$k] = $v;
         }
 
-        $result['range'] = \App\App::RANGE_NAME[$this->battle_props['range']];
+        $result['range'] = \App\App::RANGE_NAME[$this->battle_props[App::BATTLE_PROP_RANGE]];
         $result['type'] = \App\App::SHIP_TYPE_HASH[$this->type]['title'];
 
         if (isset($this->is_locked)) {
@@ -225,9 +226,9 @@ class Ship implements JsonSerializable {
                 $result['tactics'][$tid]['in_use'] = true;
             }
         }
-        
-        foreach ($this->battle_props as $k => $v){
-            $result[$k] = $this->get_battle_prop($k);
+
+        foreach ($this->battle_props as $k => $v) {
+            $result[$k] = $this->get_battle_prop($k, true);
         }
 
         return $result;
@@ -250,21 +251,31 @@ class Ship implements JsonSerializable {
         $this->skill_buff[$name] += $value;
     }
 
-    public function get_battle_prop($name) {
+    public function get_battle_prop($name, $as_string = false) {
         if (!isset($this->battle_props[$name])) {
             return null;
         }
         $base = $this->battle_props[$name];
-        
+
+        $extra = 0;
+
         if (isset($this->equip_buff[$name])) {
-            $base += $this->equip_buff[$name];
+            $extra += $this->equip_buff[$name];
         }
 
         if (isset($this->skill_buff[$name])) {
-            $base += $this->skill_buff[$name];
+            $extra += $this->skill_buff[$name];
         }
 
-        return $base;
+        if ($as_string && $extra != 0) {
+            if ($extra > 0) {
+                $extra = '+' . $extra;
+            }
+            return $base . $extra . '=' . ($base + $extra);
+        }
+        else {
+            return $base + $extra;
+        }
     }
 
     /////////////////////////////////////////
@@ -286,9 +297,6 @@ class Ship implements JsonSerializable {
             }
             if (isset($ship_info[$v])) {
                 $this->{$k} = $ship_info[$v];
-            }
-            else {
-                $this->{$k} = 0;
             }
         }
 
@@ -349,8 +357,8 @@ class Ship implements JsonSerializable {
     protected function calc_equip_buff() {
         foreach ($this->equipment as $equip) {
             if ($equip !== null) {
-                foreach (\App\App::SHIP_BATTLE_PROP_NAME as $k => $v) {
-                    if (!isset($equip[$k]) || !isset($this->battle_props[$k]) || $k == 'range') {
+                foreach (App::SHIP_BATTLE_PROP_NAME as $k => $v) {
+                    if (!isset($equip[$k]) || !isset($this->battle_props[$k]) || $k == App::BATTLE_PROP_SPEED) {
                         continue;
                     }
 

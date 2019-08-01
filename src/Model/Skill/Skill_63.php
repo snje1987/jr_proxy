@@ -4,6 +4,7 @@ namespace App\Model\Skill;
 
 use Exception;
 use App\Model\Skill;
+use App\App;
 
 /**
  * 皇家巡游
@@ -17,12 +18,15 @@ class Skill_63 extends Skill {
      * @param \App\Model\Fleet $enemy_fleet
      */
     public function apply($from_index, $self_fleet, $enemy_fleet = null) {
-        if ($from_index != 0 || $this->level <= 0) {
+        if ($this->level <= 0) {
+            return;
+        }
+        if ($from_index != 0) {
             return;
         }
         $ships = $self_fleet->get_ships();
         foreach ($ships as $ship) {
-            $ship->add_skill_buff('speed', $this->level + 1);
+            $ship->add_skill_buff(App::BATTLE_PROP_SPEED, $this->level + 1);
         }
     }
 

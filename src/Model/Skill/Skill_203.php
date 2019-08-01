@@ -4,6 +4,7 @@ namespace App\Model\Skill;
 
 use Exception;
 use App\Model\Skill;
+use App\App;
 
 /**
  * 高速小队
@@ -24,17 +25,17 @@ class Skill_203 extends Skill {
         $ships = $self_fleet->get_ships();
         foreach ($ships as $index => $ship) {
             if ($ship->ship_cid == '10033712') {
-                $ship->add_skill_buff('hit', $this->level * 5);
+                $ship->add_skill_buff(App::BATTLE_PROP_HIT, $this->level * 5);
                 $self = $self_fleet->get_ship($from_index);
                 if ($self !== null) {
-                    $self->add_skill_buff('hit', $this->level * 5);
+                    $self->add_skill_buff(App::BATTLE_PROP_HIT, $this->level * 5);
                 }
             }
 
             if ($index == $from_index - 1 || $index == $from_index + 1) {
-                if ($ship->type == 10 || $ship->type == 12) {
-                    $ship->add_skill_buff('speed', $this->level + 1);
-                    $ship->add_skill_buff('miss', $this->level * 4);
+                if ($ship->type == App::SHIP_TYPE_DD || $ship->type == App::SHIP_TYPE_CL) {
+                    $ship->add_skill_buff(App::BATTLE_PROP_SPEED, $this->level + 1);
+                    $ship->add_skill_buff(App::BATTLE_PROP_MISS, $this->level * 4);
                 }
             }
         }

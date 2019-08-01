@@ -42,7 +42,7 @@ $ship_info = $ship->get_ship_card();
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary"><?= $name ?></span>
                 <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;">
-                    <?= is_array($ship_info[$k]) ? $ship_info[$k][0] . '+' . $ship_info[$k][1] . '=' . ($ship_info[$k][0] + $ship_info[$k][1]) : $ship_info[$k] ?>
+                    <?= $ship_info[$k] ?>
                 </span>
             </div>
         <?php } ?>
@@ -59,8 +59,8 @@ $ship_info = $ship->get_ship_card();
             ?>
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary"><?= $name ?></span>
-                <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;">
-                    <?= $ship_info[$k] ?>/<?= is_array($ship_info[$k . '_max']) ? $ship_info[$k . '_max'][0] . '+' . $ship_info[$k . '_max'][1] . '=' . ($ship_info[$k . '_max'][0] + $ship_info[$k . '_max'][1]) : $ship_info[$k . '_max'] ?>
+                <span class="btn btn-info" style="color:black;min-width:90px;text-align:right;">
+                    <?= $ship_info[$k] ?>/<?= $ship_info[$k . '_max'] ?>
                 </span>
             </div>
         <?php } ?>
@@ -72,8 +72,8 @@ $ship_info = $ship->get_ship_card();
             ?>
             <div class="btn btn-group btn-group-xs" style="padding:1px;">
                 <span class="btn btn-primary"><?= $name ?></span>
-                <span class="btn btn-info" style="color:black;min-width:60px;text-align:right;">
-                    <?= is_array($ship_info[$k]) ? $ship_info[$k][0] . '+' . $ship_info[$k][1] . '=' . ($ship_info[$k][0] + $ship_info[$k][1]) : $ship_info[$k] ?>
+                <span class="btn btn-info" style="color:black;min-width:90px;text-align:right;">
+                    <?= $ship_info[$k] ?>
                 </span>
             </div>
         <?php } ?>
@@ -101,7 +101,7 @@ $ship_info = $ship->get_ship_card();
 
     <div class="panel-body" style="padding:5px;">
         <?php if (!empty($ship_info['skill'])) { ?>
-            <span class="btn btn-primary btn-xs" title="<?= $ship_info['skill']['desc'] ?>"><?= $ship_info['skill']['title'] ?> Lv<?= $ship_info['skill']['level'] ?></span>
+            <span class="btn btn-primary btn-xs" title="<?= $ship_info['skill']['sid'] ?>&#10;<?= $ship_info['skill']['desc'] ?>"><?= $ship_info['skill']['title'] ?> Lv<?= $ship_info['skill']['level'] ?></span>
         <?php } ?>
     </div>
 
@@ -110,7 +110,7 @@ $ship_info = $ship->get_ship_card();
     <div class="panel-body" style="padding:5px;">
         <?php foreach ($ship_info['tactics'] as $tactic) { ?>
             <?php $class = (isset($tactic['in_use']) && $tactic['in_use'] == 1 ? 'primary' : 'default'); ?>
-            <span class="btn btn-<?= $class ?> btn-xs" title="<?= $tactic['desc'] ?>"><?= $tactic['title'] ?> Lv<?= $tactic['level'] ?></span>
+            <span class="btn btn-<?= $class ?> btn-xs" title="<?= $tactic['tid'] ?>&#10;<?= $tactic['desc'] ?>"><?= $tactic['title'] ?> Lv<?= $tactic['level'] ?></span>
         <?php } ?>
     </div>
 </div>

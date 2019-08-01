@@ -244,7 +244,7 @@ class WarLog {
     }
 
     public function show_skill($skill) {
-        return '<span class="btn btn-primary btn-xs" title="' . $skill['desc'] . '">' . $skill['title'] . ' Lv' . $skill['level'] . '</span>';
+        return '<span class="btn btn-primary btn-xs" title="' . $skill['sid'] . "\n" . $skill['desc'] . '">' . $skill['title'] . ' Lv' . $skill['level'] . '</span>';
     }
 
     public function attack_ship($ship, $damage) {
@@ -298,6 +298,9 @@ class WarLog {
 
         $this->get_self_fleet();
         $this->get_enemy_fleet();
+
+        $this->self_fleet->apply_skill($this->enemy_fleet);
+        $this->enemy_fleet->apply_skill($this->self_fleet);
 
         //buff信息
         $self_buffs = $this->get_buff_info($report['selfBuffs'], 1);

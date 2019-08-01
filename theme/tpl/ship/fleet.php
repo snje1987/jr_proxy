@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>战斗记录</title>
+        <title>编队辅助</title>
         <?php include APP_TPL_DIR . '/inc/header.php' ?>
     </head>
     <body>
