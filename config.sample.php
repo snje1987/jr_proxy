@@ -9,6 +9,7 @@ return [
         'war_log' => 0, //是否记录战斗数据，1为开启，0为不开启
         'war_log_path' => '{uid}/{type}/{year}{month}{day}_{hour}{min}{sec}_{map}', //战斗记录保存路径，不要包含中文，可用变量：{uid} {type} {year} {month} {day} {hour} {min} {sec} {map}
         'show_card_name' => 1, //战斗记录中显示图鉴名称
+        'damage_range' => 0, //显示伤害范围
         'war_replay' => 0, //是否开启战斗回放功能，1为开启，0为不开启
     ],
     'web_server' => [//Web服务器设置

@@ -29,10 +29,12 @@ class WarLog {
     ///////////////////
 
     protected $cfg_show_card_name = 1;
+    protected $cfg_show_damage_range = 0;
 
     public function __construct() {
         $this->game_info = GameInfo::get();
         $this->cfg_show_card_name = \App\Config::get('main', 'show_card_name', 1);
+        $this->cfg_show_damage_range = \App\Config::get('main', 'damage_range', 0);
     }
 
     public function init($file) {
@@ -120,7 +122,9 @@ class WarLog {
 
             foreach ($attack['attack'] as $damage) {
 
-                $str .= $this->show_damage($damage);
+                $attack_calc = $this->build_calculator($attack, $damage);
+
+                $str .= $this->show_damage($damage, $attack_calc);
                 $str .= ' 目标 ';
 
                 if (!empty($damage['helper'])) {
@@ -173,7 +177,7 @@ class WarLog {
         return implode('', $htmls);
     }
 
-    public function show_damage($damage) {
+    public function show_damage($damage, $attack_calc = null) {
         if ($damage['critical'] == 1) {
             $flag = '击穿';
             $style = 'color:red;font-weight:bold;';
@@ -183,7 +187,13 @@ class WarLog {
             $style = 'color:black;';
         }
 
-        $str = '<span class="btn btn-primary">' . $flag . '</span><span class="btn btn-info" style="' . $style . 'min-width:50px;text-align:right;">' . $damage['damage'] . $damage['extra'] . '</span>';
+        $range = '';
+        if ($attack_calc !== null) {
+            list($min, $max) = $attack_calc->calc_range();
+            $range = 'D(' . $min . ', ' . $max . ') = ';
+        }
+
+        $str = '<span class="btn btn-primary">' . $flag . '</span><span class="btn btn-info" style="' . $style . 'min-width:50px;text-align:right;">' . $range . $damage['damage'] . $damage['extra'] . '</span>';
 
         return '<div class="btn-group btn-group-xs">' . $str . '</div>';
     }
@@ -279,7 +289,83 @@ class WarLog {
         return $str;
     }
 
+    public function get_ship($ship_info) {
+        if ($ship_info[0] == 1) {
+            return $this->self_fleet->get_ship($ship_info[1]);
+        }
+        else {
+            return $this->enemy_fleet->get_ship($ship_info[1]);
+        }
+    }
+
+    public function get_hp($ship_info) {
+        if ($ship_info[0] == 1) {
+            return $this->self_ships[$ship_info[1]]['hp_left'];
+        }
+        else {
+            return $this->enemy_ships[$ship_info[1]]['hp_left'];
+        }
+    }
+
     /////////////////////////////////////////////
+
+    protected function build_calculator($attack, $damage) {
+
+        if (!$this->cfg_show_damage_range) {
+            return null;
+        }
+
+        if ($attack['type'] == 1) {
+            $attack_calc = new Attack\NormalAttack();
+        }
+        else {
+            return null;
+        }
+
+        $from = $this->get_ship($attack['from']);
+
+        $from = clone $from;
+        $from->set_hp($this->get_hp($attack['from']));
+
+        $attack_calc->from = $from;
+
+        if ($attack['from'][0] == 1) {
+            $attack_calc->formation = $this->self_fleet->formation;
+            $attack_calc->war_type = $this->war_type['id'];
+            $attack_calc->air_control = $this->air_control;
+        }
+        else {
+            $attack_calc->formation = $this->enemy_fleet->formation;
+            if ($this->war_type['id'] == 1 || $this->war_type['id'] == 2) {
+                $attack_calc->war_type = $this->war_type['id'];
+            }
+            else {
+                $attack_calc->war_type = 7 - $this->war_type['id'];
+            }
+            $attack_calc->air_control = 6 - $this->air_control['id'];
+        }
+
+
+        if (!empty($damage['helper'])) {
+            $true_target = $damage['helper'];
+        }
+        elseif (!empty($damage['defencer'])) {
+            $true_target = $damage['defencer'];
+        }
+        else {
+            $true_target = $damage['target'];
+        }
+
+        $to = $this->get_ship($true_target);
+
+        $to = clone $to;
+        $to->set_hp($this->get_hp($true_target));
+        $attack_calc->to = $to;
+
+        $attack_calc->critical = $damage['critical'];
+
+        return $attack_calc;
+    }
 
     protected $raw_data = null;
     protected $game_info;
@@ -320,6 +406,7 @@ class WarLog {
         //航向信息
         $buff = $this->game_info->get_buff_card('93' . $war_type);
         $this->war_type = [
+            'id' => $war_type,
             'title' => $buff['title'],
             'desc' => $buff['desc'],
         ];
@@ -327,6 +414,7 @@ class WarLog {
         if ($report['airControlType'] > 0) {
             $buff = $this->game_info->get_buff_card('91' . $report['airControlType']);
             $this->air_control = [
+                'id' => $report['airControlType'],
                 'title' => $buff['title'],
                 'desc' => $buff['desc'],
             ];
@@ -411,6 +499,7 @@ class WarLog {
 
         $attack = [
             'from' => [$self_ship, $from],
+            'type' => $info['attackType'],
             'attack' => [],
         ];
 
@@ -524,10 +613,10 @@ class WarLog {
         $report = $this->raw_data['war_day']['warReport'];
 
         $title = $report['selfFleet']['title'];
-        $formation = self::FORMATION_NAME[$report['selfFleet']['formation']];
 
         $this->self_fleet = new Fleet(0, $title);
-        $this->self_fleet->formation = $formation;
+        $this->self_fleet->formation = $report['selfFleet']['formation'];
+        $this->self_fleet->formation_str = self::FORMATION_NAME[$this->self_fleet->formation];
 
         $ship_list = [];
         $this->self_ships = [];
@@ -564,10 +653,10 @@ class WarLog {
         $report = $this->raw_data['war_day']['warReport'];
 
         $title = $report['enemyFleet']['title'];
-        $formation = self::FORMATION_NAME[$report['enemyFleet']['formation']];
 
         $this->enemy_fleet = new Fleet(0, $title);
-        $this->enemy_fleet->formation = $formation;
+        $this->enemy_fleet->formation = $report['enemyFleet']['formation'];
+        $this->enemy_fleet->formation_str = self::FORMATION_NAME[$this->enemy_fleet->formation];
 
         $ship_list = [];
         $this->enemy_ships = [];

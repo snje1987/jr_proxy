@@ -2,7 +2,7 @@
 
 use App\Controler\Warlog ?>
 <div class="panel panel-primary">
-    <div class="panel-heading" data-toggle="collapse" data-target="#self_fleet">我方舰队-<?= $log->self_fleet->formation ?>-<?= $log->self_fleet->title ?></div>
+    <div class="panel-heading" data-toggle="collapse" data-target="#self_fleet">我方舰队-<?= $log->self_fleet->formation_str ?>-<?= $log->self_fleet->title ?></div>
     <div class="collapse" id="self_fleet">
         <div class="container-fluid" style="padding:5px 20px;">
             <?php $fleet = $log->self_fleet; ?>
@@ -11,7 +11,7 @@ use App\Controler\Warlog ?>
     </div>
 </div>
 <div class="panel panel-primary">
-    <div class="panel-heading" data-toggle="collapse" data-target="#enemy_fleet">敌方舰队-<?= $log->enemy_fleet->formation ?>-<?= $log->enemy_fleet->title ?></div>
+    <div class="panel-heading" data-toggle="collapse" data-target="#enemy_fleet">敌方舰队-<?= $log->enemy_fleet->formation_str ?>-<?= $log->enemy_fleet->title ?></div>
     <div class="collapse" id="enemy_fleet">
         <div class="container-fluid" style="padding:5px 20px;">
             <?php $fleet = $log->enemy_fleet; ?>

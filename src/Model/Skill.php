@@ -29,5 +29,8 @@ abstract class Skill {
      * @param Fleet $self_fleet
      * @param Fleet $enemy_fleet
      */
-    abstract public function apply($from_index, $self_fleet, $enemy_fleet = null);
+    public function apply($from_index, $self_fleet, $enemy_fleet = null) {
+        
+    }
+
 }

@@ -33,6 +33,7 @@ class Ship implements JsonSerializable {
     protected $extra_attr;
     protected $ship_index;
     protected $evo_class;
+    protected $attack_hook = [];
 
     public function __get($name) {
         if (isset($this->{$name})) {
@@ -132,6 +133,10 @@ class Ship implements JsonSerializable {
             if (isset($ship_info[$k])) {
                 $this->res[$k] = $ship_info[$k];
                 $this->res[$k . '_max'] = $ship_info[$k . 'Max'];
+            }
+            else {
+                $this->res[$k] = 1;
+                $this->res[$k . '_max'] = 1;
             }
         }
 
@@ -275,6 +280,20 @@ class Ship implements JsonSerializable {
         }
         else {
             return $base + $extra;
+        }
+    }
+
+    public function set_hp($value) {
+        $this->res['hp'] = $value;
+    }
+
+    public function add_attack_hook($callable) {
+        $this->attack_hook[] = $callable;
+    }
+
+    public function on_attack($attack, $side) {
+        foreach ($this->attack_hook as $callable) {
+            call_user_func($callable, $attack, $side);
         }
     }
 
