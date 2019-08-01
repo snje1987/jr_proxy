@@ -42,9 +42,14 @@ class Skill_207 extends Skill {
         if ($side != 1) {
             return;
         }
+
+        if ($attack->group_name != 'normal_attack' && $attack->group_name != 'normal_attack2') {
+            return;
+        }
+
         $speed = $attack->to->get_battle_prop('speed');
-        if($speed >= 27){
-            $attack->damage_add = 5 * $this->level;
+        if ($speed >= 27) {
+            $attack->damage_add = [5 * $this->level, 5 * $this->level];
         }
     }
 

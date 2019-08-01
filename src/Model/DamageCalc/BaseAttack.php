@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Model\Attack;
+namespace App\Model\DamageCalc;
 
 use Exception;
 use App\App;
@@ -11,6 +11,7 @@ class BaseAttack {
     protected $war_type = null; //航向信息
     protected $air_control = null;
     protected $critical = null;
+    protected $group_name;
 
     /**
      * @var \App\Model\Ship 
@@ -28,13 +29,12 @@ class BaseAttack {
     protected $formation_var;
     protected $war_type_var;
     protected $critical_var;
-    protected $skill_var = 1;
-    protected $damage_var = 1;
-    protected $damage_add = 0;
-    protected $damage_range = [1, 1];
+    protected $skill_var = [1, 1];
+    protected $damage_add = [0, 0];
+    protected $damage_var = [1, 1];
 
-    public function __construct() {
-        
+    public function __construct($group_name) {
+        $this->group_name = $group_name;
     }
 
     public function __get($name) {

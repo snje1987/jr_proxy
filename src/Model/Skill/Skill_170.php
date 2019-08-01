@@ -33,7 +33,9 @@ class Skill_170 extends Skill {
         if ($side != 1) {
             return;
         }
-        $attack->damage_range = [(75 + $this->level * 5) / 100, (115 + $this->level * 5) / 100];
+        if ($attack->group_name == 'normal_attack' || $attack->group_name == 'normal_attack2') {
+            $attack->damage_range = [(75 + $this->level * 5) / 100, (115 + $this->level * 5) / 100];
+        }
     }
 
 }

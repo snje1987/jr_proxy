@@ -39,33 +39,12 @@ use App\Controler\Warlog ?>
         <?php } ?>
     </div>
 </div>
-<?php if (!empty($log->support_attack)) { ?>
-    <div class="panel panel-primary">
-        <div class="panel-heading">支援攻击</div>
-        <div class="panel-body">
-            <?= $log->show_support_attack() ?>
-        </div>
-    </div>
-<?php } ?>
-<?php if (!empty($log->open_air_attack)) { ?>
-    <div class="panel panel-primary">
-        <div class="panel-heading">航空战</div>
-        <div class="panel-body">
-            <?php if (!empty($log->air_control)) { ?>
-                <div style="margin-bottom:5px;">
-                    <span class="btn btn-primary" title="<?= $log->air_control['desc'] ?>"><?= $log->air_control['title'] ?></span>
-                </div>
-            <?php } ?>
-            <?= $log->show_open_air_attack() ?>
-        </div>
-    </div>
-<?php } ?>
 <?php foreach (Warlog::ATTACK_NAMES as $key => $name) { ?>
-    <?php if (!empty($log->{$key})) { ?>
+    <?php if (!empty($log->round_groups[$key])) { ?>
         <div class="panel panel-primary">
             <div class="panel-heading"><?= $name ?></div>
             <div class="panel-body">
-                <?= $log->show_attack($key) ?>
+                <?= $log->round_groups[$key]->display() ?>
             </div>
         </div>
     <?php } ?>

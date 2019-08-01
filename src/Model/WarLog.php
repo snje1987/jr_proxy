@@ -15,26 +15,15 @@ class WarLog {
     public $explore_buff = [];
     public $war_type = [];
     public $air_control = [];
-    public $support_attack = [];
-    public $open_air_attack = [];
-    public $open_missile_attack = [];
-    public $open_anti_sub_attack = [];
-    public $open_torpedo_attack = [];
-    public $normal_attack = [];
-    public $normal_attack2 = [];
-    public $close_torpedo_attack = [];
-    public $close_missile_attack = [];
-    public $night_attack = [];
     public $locked_ships = [];
+    public $round_groups = [];
     ///////////////////
-
+    protected $war_counter;
     protected $cfg_show_card_name = 1;
-    protected $cfg_show_damage_range = 0;
 
     public function __construct() {
         $this->game_info = GameInfo::get();
         $this->cfg_show_card_name = \App\Config::get('main', 'show_card_name', 1);
-        $this->cfg_show_damage_range = \App\Config::get('main', 'damage_range', 0);
     }
 
     public function init($file) {
@@ -59,95 +48,6 @@ class WarLog {
         }
     }
 
-    public function show_support_attack() {
-        $htmls = [];
-        foreach ($this->support_attack as $attack) {
-            $str = '';
-
-            foreach ($attack['attack'] as $damage) {
-                $str .= $this->show_damage($damage);
-                $str .= ' 目标 ' . $this->attack_ship($damage['target'], $damage['damage']);
-
-                $str .= '<br />';
-            }
-
-            $htmls[] = '<div style="margin-bottom:5px;">' . $str . '</div>';
-        }
-
-        return implode('', $htmls);
-    }
-
-    public function show_open_air_attack() {
-        $htmls = [];
-        foreach ($this->open_air_attack as $attack) {
-
-            $str = self::show_ship($attack['from']) . ' 发动空袭<br />';
-
-            foreach ($attack['attack'] as $damage) {
-
-                $str .= $this->show_drop($damage) . ' ';
-
-                if ($damage['plane_type'] != 5) {
-                    $str .= $this->show_damage($damage);
-                    $str .= ' 目标 ' . $this->attack_ship($damage['target'], $damage['damage']);
-                }
-
-                $str .= '<br />';
-            }
-
-            $str .= '<br />';
-
-            $htmls[] = '<div style="margin-bottom:5px;">' . $str . '</div>';
-        }
-
-        return implode('', $htmls);
-    }
-
-    public function show_attack($name) {
-        $htmls = [];
-
-        if (!isset($this->{$name})) {
-            return '';
-        }
-
-        foreach ($this->{$name} as $attack) {
-
-            $str = self::show_ship($attack['from']);
-
-            if (!empty($attack['skill'])) {
-                $str .= ' 发动技能 ' . $this->show_skill($attack['skill']);
-            }
-
-            $str .= ' 进行攻击<br />';
-
-            foreach ($attack['attack'] as $damage) {
-
-                $attack_calc = $this->build_calculator($attack, $damage);
-
-                $str .= $this->show_damage($damage, $attack_calc);
-                $str .= ' 目标 ';
-
-                if (!empty($damage['helper'])) {
-                    $str .= $this->show_ship($damage['target']) . ' 被代替 ' . $this->attack_ship($damage['helper'], $damage['damage']);
-                }
-                elseif (!empty($damage['defencer'])) {
-                    $str .= $this->show_ship($damage['target']) . ' 被拦截 ' . $this->attack_ship($damage['defencer'], $damage['damage']);
-                }
-                else {
-                    $str .= $this->attack_ship($damage['target'], $damage['damage']);
-                }
-
-                $str .= '<br />';
-            }
-
-            $str .= '<br />';
-
-            $htmls[] = '<div style="margin-bottom:5px;">' . $str . '</div>';
-        }
-
-        return implode('', $htmls);
-    }
-
     public function show_buffs() {
         $htmls = [];
 
@@ -162,12 +62,12 @@ class WarLog {
 
             $str = '<span class="btn btn-' . $class . ' btn-xs" title="' . $buff['desc'] . '">' . $buff['title'] . '</span> 来自 ';
 
-            $str .= self::show_ship($from);
+            $str .= $this->war_counter->show_ship($from);
 
             $str .= ' 作用于 <br />';
 
             foreach ($buff['to'] as $v) {
-                $str .= ' ' . self::show_ship($v);
+                $str .= ' ' . $this->war_counter->show_ship($v);
             }
             $str .= '<br /><br />';
 
@@ -175,118 +75,6 @@ class WarLog {
         }
 
         return implode('', $htmls);
-    }
-
-    public function show_damage($damage, $attack_calc = null) {
-        if ($damage['critical'] == 1) {
-            $flag = '击穿';
-            $style = 'color:red;font-weight:bold;';
-        }
-        else {
-            $flag = '伤害';
-            $style = 'color:black;';
-        }
-
-        $range = '';
-        if ($attack_calc !== null) {
-            list($min, $max) = $attack_calc->calc_range();
-            $range = 'D(' . $min . ', ' . $max . ') = ';
-        }
-
-        $str = '<span class="btn btn-primary">' . $flag . '</span><span class="btn btn-info" style="' . $style . 'min-width:50px;text-align:right;">' . $range . $damage['damage'] . $damage['extra'] . '</span>';
-
-        return '<div class="btn-group btn-group-xs">' . $str . '</div>';
-    }
-
-    public function show_drop($damage) {
-        if ($damage['plane_type'] == 5) {
-            $str = '<span class="btn btn-primary">战斗机</span>';
-        }
-        elseif ($damage['plane_type'] == 6) {
-            $str = '<span class="btn btn-primary">轰炸机</span>';
-        }
-        else {
-            $str = '<span class="btn btn-primary">鱼雷机</span>';
-        }
-
-        $str .= '<span class="btn btn-info" style="color:black;min-width:50px;">' . $damage['drop'] . '/' . $damage['amount'] . '</span>';
-
-
-
-        return '<div class="btn-group btn-group-xs">' . $str . '</div>';
-    }
-
-    public function show_ship($ship) {
-        if ($ship[0] == 1) {
-            $class = 'success';
-            $list = $this->self_ships;
-        }
-        else {
-            $class = 'danger';
-            $list = $this->enemy_ships;
-        }
-
-        $ship_info = $list[$ship[1]];
-
-        $str = '<span class="btn btn-primary">' . $ship[1] . '</span><span class="btn btn-' . $class . '" btn-xs>' . $ship_info['title'] . '</span>';
-
-        if ($ship_info['hp_left'] > 0) {
-            if ($ship_info['hp_left'] * 2 >= $ship_info['hp_max']) {
-                $btn = 'info';
-                $color = 'black';
-            }
-            elseif ($ship_info['hp_left'] * 4 >= $ship_info['hp_max']) {
-                $btn = 'warning';
-                $color = 'black';
-            }
-            else {
-                $btn = 'warning';
-                $color = 'red';
-            }
-
-            $str .= '<span class="btn btn-' . $btn . '" style="color:' . $color . ';min-width:60px;text-align:right;">' . $ship_info['hp_left'] . '/' . $ship_info['hp_max'] . '</span>';
-        }
-        else {
-            $str .= '<span class="btn btn-warning" style="color:red;min-width:60px;text-align:center;">击沉</span>';
-        }
-
-        return '<div class="btn-group btn-group-xs">' . $str . '</div>';
-    }
-
-    public function show_skill($skill) {
-        return '<span class="btn btn-primary btn-xs" title="' . $skill['sid'] . "\n" . $skill['desc'] . '">' . $skill['title'] . ' Lv' . $skill['level'] . '</span>';
-    }
-
-    public function attack_ship($ship, $damage) {
-        $str = $this->show_ship($ship);
-
-        if ($damage == 0) {
-            return $str;
-        }
-
-        if ($ship[0] == 1) {
-            $list = &$this->self_ships;
-        }
-        else {
-            $list = &$this->enemy_ships;
-        }
-
-        $ship_info = $list[$ship[1]];
-
-        if ($ship_info['hp_left'] <= 0) {
-            return $str;
-        }
-
-        $ship_info['hp_left'] -= $damage;
-        if ($ship_info['hp_left'] < 0) {
-            $ship_info['hp_left'] = 0;
-        }
-
-        $list[$ship[1]] = $ship_info;
-
-        $str .= ' <span class="glyphicon glyphicon-arrow-right"></span> ' . $this->show_ship($ship);
-
-        return $str;
     }
 
     public function get_ship($ship_info) {
@@ -298,74 +86,25 @@ class WarLog {
         }
     }
 
-    public function get_hp($ship_info) {
-        if ($ship_info[0] == 1) {
-            return $this->self_ships[$ship_info[1]]['hp_left'];
+    public function fill_fleet_info($damage_calc, $side) {
+        if ($side == 1) {
+            $damage_calc->formation = $this->self_fleet->formation;
+            $damage_calc->war_type = $this->war_type['id'];
+            $damage_calc->air_control = $this->air_control;
         }
         else {
-            return $this->enemy_ships[$ship_info[1]]['hp_left'];
+            $damage_calc->formation = $this->enemy_fleet->formation;
+            if ($this->war_type['id'] == 1 || $this->war_type['id'] == 2) {
+                $damage_calc->war_type = $this->war_type['id'];
+            }
+            else {
+                $damage_calc->war_type = 7 - $this->war_type['id'];
+            }
+            $damage_calc->air_control = 6 - $this->air_control['id'];
         }
     }
 
     /////////////////////////////////////////////
-
-    protected function build_calculator($attack, $damage) {
-
-        if (!$this->cfg_show_damage_range) {
-            return null;
-        }
-
-        if ($attack['type'] == 1) {
-            $attack_calc = new Attack\NormalAttack();
-        }
-        else {
-            return null;
-        }
-
-        $from = $this->get_ship($attack['from']);
-
-        $from = clone $from;
-        $from->set_hp($this->get_hp($attack['from']));
-
-        $attack_calc->from = $from;
-
-        if ($attack['from'][0] == 1) {
-            $attack_calc->formation = $this->self_fleet->formation;
-            $attack_calc->war_type = $this->war_type['id'];
-            $attack_calc->air_control = $this->air_control;
-        }
-        else {
-            $attack_calc->formation = $this->enemy_fleet->formation;
-            if ($this->war_type['id'] == 1 || $this->war_type['id'] == 2) {
-                $attack_calc->war_type = $this->war_type['id'];
-            }
-            else {
-                $attack_calc->war_type = 7 - $this->war_type['id'];
-            }
-            $attack_calc->air_control = 6 - $this->air_control['id'];
-        }
-
-
-        if (!empty($damage['helper'])) {
-            $true_target = $damage['helper'];
-        }
-        elseif (!empty($damage['defencer'])) {
-            $true_target = $damage['defencer'];
-        }
-        else {
-            $true_target = $damage['target'];
-        }
-
-        $to = $this->get_ship($true_target);
-
-        $to = clone $to;
-        $to->set_hp($this->get_hp($true_target));
-        $attack_calc->to = $to;
-
-        $attack_calc->critical = $damage['critical'];
-
-        return $attack_calc;
-    }
 
     protected $raw_data = null;
     protected $game_info;
@@ -384,6 +123,10 @@ class WarLog {
 
         $this->get_self_fleet();
         $this->get_enemy_fleet();
+        $this->war_counter = new WarCounter();
+        $this->war_counter->set_self_ships($this->self_ships);
+        $this->war_counter->set_enemy_ships($this->enemy_ships);
+
 
         $this->self_fleet->apply_skill($this->enemy_fleet);
         $this->enemy_fleet->apply_skill($this->self_fleet);
@@ -433,19 +176,27 @@ class WarLog {
         }
 
         foreach (self::ATTACK_NAMES as $k => $v) {
-            $merge_all = false;
-            if ($k == 'open_air_attack' || $k == 'open_torpedo_attack' || $k == 'close_torpedo_attack') {
-                $merge_all = true;
+            if (empty($report[$v])) {
+                continue;
             }
-            $this->{$k} = $this->get_attacks($report[$v], $merge_all);
+            $round_group = new RoundGroup($k, $this, $this->war_counter);
+            $round_group->init($report[$v]);
+
+            $this->round_groups[$k] = $round_group;
         }
 
-        if (isset($this->raw_data['war_result']) && isset($this->raw_data['war_result']['extraProgress']) && isset($this->raw_data['war_result']['extraProgress']['nightAttacks'])) {
-            $this->night_attack = $this->get_attacks($this->raw_data['war_result']['extraProgress']['nightAttacks'], false);
+        if (isset($this->raw_data['war_result']) &&
+                isset($this->raw_data['war_result']['extraProgress']) &&
+                isset($this->raw_data['war_result']['extraProgress']['nightAttacks'])) {
+
+            $round_group = new RoundGroup('night_attack', $this);
+            $round_group->init($this->raw_data['war_result']['extraProgress']['nightAttacks'], $this->war_counter);
+
+            $this->round_groups['night_attack'] = $round_group;
         }
     }
 
-    protected function get_attacks($list, $merge_all) {
+    protected function get_round_group($group_name, $list) {
         $attacks = [];
         foreach ($list as $v) {
             $tmp = $this->add_one_attack($v);

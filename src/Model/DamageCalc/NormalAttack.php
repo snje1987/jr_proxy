@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Model\Attack;
+namespace App\Model\DamageCalc;
 
 use Exception;
 use App\App;
 
 class NormalAttack extends BaseAttack {
 
-    public function __construct() {
-        parent::__construct();
+    public function __construct($group_name) {
+        parent::__construct($group_name);
     }
 
     public function calc_range() {
@@ -21,21 +21,21 @@ class NormalAttack extends BaseAttack {
         $atk = $this->from->get_battle_prop(App::BATTLE_PROP_ATK);
 
         $base_atk = $atk + 5;
-        $other_vars = $base_atk * $this->formation_var * $this->war_type_var * $this->ammo_var * $this->hp_var * $this->critical_var * $this->skill_var;
+        $other_vars = $base_atk * $this->formation_var * $this->war_type_var * $this->ammo_var * $this->hp_var * $this->critical_var;
 
-        $min_atk = $other_vars * self::RANDOM_RANGE[0];
-        $max_atk = $other_vars * self::RANDOM_RANGE[1];
+        $min_atk = $other_vars * $this->skill_var[0] * self::RANDOM_RANGE[0];
+        $max_atk = $other_vars * $this->skill_var[1] * self::RANDOM_RANGE[1];
 
         $def = $this->to->get_battle_prop(App::BATTLE_PROP_DEF);
         $target_hp = $this->to->res['hp'];
 
-        $min_damage = ceil($min_atk * (1 - ($def / (0.5 * $def + 0.6 * $min_atk))) * $this->damage_var * $this->damage_range[0]) + $this->damage_add;
-        $max_damage = ceil($max_atk * (1 - ($def / (0.5 * $def + 0.6 * $max_atk))) * $this->damage_var * $this->damage_range[1]) + $this->damage_add;
+        $min_damage = ceil($min_atk * (1 - ($def / (0.5 * $def + 0.6 * $min_atk))) * $this->damage_var[0]) + $this->damage_add[0];
+        $max_damage = ceil($max_atk * (1 - ($def / (0.5 * $def + 0.6 * $max_atk))) * $this->damage_var[1]) + $this->damage_add[1];
 
         if ($min_damage < 0) {
             $min_damage = 0;
         }
-        if ($max_damage < 0) {
+        if ($max_damage <= 0) {
             $max_damage = ceil(min([$base_atk, $target_hp]) / 10);
         }
 

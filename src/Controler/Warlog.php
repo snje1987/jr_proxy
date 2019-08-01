@@ -154,6 +154,8 @@ class Warlog extends BaseControler {
 
     //////////////////////////
     const ATTACK_NAMES = [
+        'support_attack' => '支援攻击',
+        'open_air_attack' => '航空战',
         'open_missile_attack' => '开幕导弹',
         'open_anti_sub_attack' => '先制反潜',
         'open_torpedo_attack' => '先制鱼雷',
