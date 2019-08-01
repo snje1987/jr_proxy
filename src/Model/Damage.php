@@ -8,15 +8,17 @@ class Damage {
 
     protected $round_group;
     protected $log;
+    protected $attack;
     protected $target;
     protected $damage;
     protected $critical;
     protected $extra_def;
     protected $helper;
 
-    public function __construct($round_group) {
+    public function __construct($round_group, $attack) {
         $this->round_group = $round_group;
         $this->log = $this->round_group->log;
+        $this->attack = $attack;
     }
 
     public function init($info, $self_ship, $enemy_ship) {
@@ -38,7 +40,7 @@ class Damage {
         $this->target = [$enemy_ship, $info['index']];
     }
 
-    public function display($defencer, $damage_calc) {
+    public function display($defencer) {
 
         $true_target = $this->target;
         if (!empty($this->helper)) {
@@ -48,6 +50,7 @@ class Damage {
             $true_target = $defencer;
         }
 
+        $damage_calc = $this->attack->build_calculator();
         if ($damage_calc !== null) {
             $to = $this->log->get_ship($true_target);
             $hp_info = $this->round_group->get_ship($true_target);
@@ -93,7 +96,15 @@ class Damage {
         $range = '';
         if ($damage_calc !== null) {
             list($min, $max) = $damage_calc->calc_range();
-            $range = 'D(' . $min . ', ' . $max . ') = ';
+
+            $range = 'D(' . $min . ', ' . $max . ')  = ';
+
+            if (($this->damage < $min || $this->damage > $max) && $this->damage != 0) {
+                $range = '<span style="color:#990000;font-weight:bold;">' . $range . '</span>';
+            }
+            else {
+                $range = '<span style="color:black;font-weight:normal;">' . $range . '</span>';
+            }
         }
 
         if ($this->extra_def != 0) {
@@ -103,7 +114,7 @@ class Damage {
             $extra_str = '';
         }
 
-        $str = '<span class="btn btn-primary">' . $flag . '</span><span class="btn btn-info" style="' . $style . 'min-width:50px;text-align:right;">' . $range . $this->damage . $extra_str . '</span>';
+        $str = '<div class="btn btn-primary">' . $flag . '</div><div class="btn btn-info" style="' . $style . 'min-width:50px;text-align:right;">' . $range . $this->damage . $extra_str . '</div>';
 
         return '<div class="btn-group btn-group-xs">' . $str . '</div>';
     }

@@ -29,14 +29,20 @@ class NormalAttack extends BaseAttack {
         $def = $this->to->get_battle_prop(App::BATTLE_PROP_DEF);
         $target_hp = $this->to->res['hp'];
 
-        $min_damage = ceil($min_atk * (1 - ($def / (0.5 * $def + 0.6 * $min_atk))) * $this->damage_var[0]) + $this->damage_add[0];
-        $max_damage = ceil($max_atk * (1 - ($def / (0.5 * $def + 0.6 * $max_atk))) * $this->damage_var[1]) + $this->damage_add[1];
+        $min_damage = ceil($min_atk * (1 - ($def / (0.5 * $def + 0.6 * $min_atk))) * $this->damage_var[0]);
+        $max_damage = ceil($max_atk * (1 - ($def / (0.5 * $def + 0.6 * $max_atk))) * $this->damage_var[1]);
 
         if ($min_damage < 0) {
             $min_damage = 0;
         }
+        else {
+            $min_damage += $this->damage_add[0];
+        }
         if ($max_damage <= 0) {
-            $max_damage = ceil(min([$base_atk, $target_hp]) / 10);
+            $max_damage = ceil(min([$base_atk, $target_hp]) / 10) + $this->damage_add[1];
+        }
+        else {
+            $max_damage + $this->damage_add[1];
         }
 
         return [$min_damage, $max_damage];

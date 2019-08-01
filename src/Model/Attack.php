@@ -68,7 +68,7 @@ class Attack {
         }
 
         foreach ($info['targetIndex'] as $k => $target) {
-            $damage = new Damage($this->round_group);
+            $damage = new Damage($this->round_group, $this);
             $damage->init($info['damages'][$k], $self_ship, $enemy_ship);
             $this->damage_list[] = $damage;
         }
@@ -85,18 +85,14 @@ class Attack {
             }
         }
 
-        $damage_calc = $this->build_calculator();
-
         foreach ($this->damage_list as $damage) {
-            $str .= ' ' . $damage->display($this->defencer, $damage_calc) . '<br />';
+            $str .= ' ' . $damage->display($this->defencer) . '<br />';
         }
 
         return $str;
     }
 
-    ////////////////////////////////////
-
-    protected function build_calculator() {
+    public function build_calculator() {
 
         if (!self::$show_damage_range) {
             return null;
@@ -131,6 +127,8 @@ class Attack {
 
         return $damage_calc;
     }
+
+    ////////////////////////////////////
 
     protected function show_drop() {
         if ($this->plane_type == 5) {
