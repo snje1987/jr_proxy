@@ -18,10 +18,23 @@ class NormalAttack extends BaseAttack {
         $this->from->on_attack($this, 1);
         $this->to->on_attack($this, 2);
 
-        $atk = $this->from->get_battle_prop(App::BATTLE_PROP_ATK);
+        if ($this->damage_range !== null) {
+            return $this->damage_range;
+        }
 
-        $base_atk = $atk + 5;
-        $other_vars = $base_atk * $this->formation_var * $this->war_type_var * $this->ammo_var * $this->hp_var * $this->critical_var;
+        $this->do_calc();
+
+        return $this->damage_range;
+    }
+
+    public function do_calc() {
+
+        if ($this->base_atk === null) {
+            $atk = $this->from->get_battle_prop(App::BATTLE_PROP_ATK);
+            $this->base_atk = $atk + 5;
+        }
+
+        $other_vars = $this->base_atk * $this->formation_var * $this->war_type_var * $this->ammo_var * $this->hp_var * $this->critical_var;
 
         $min_atk = $other_vars * $this->skill_var[0] * self::RANDOM_RANGE[0];
         $max_atk = $other_vars * $this->skill_var[1] * self::RANDOM_RANGE[1];
@@ -29,8 +42,15 @@ class NormalAttack extends BaseAttack {
         $def = $this->to->get_battle_prop(App::BATTLE_PROP_DEF);
         $target_hp = $this->to->res['hp'];
 
-        $min_damage = ceil($min_atk * (1 - ($def / (0.5 * $def + 0.6 * $min_atk))) * $this->damage_var[0]);
-        $max_damage = ceil($max_atk * (1 - ($def / (0.5 * $def + 0.6 * $max_atk))) * $this->damage_var[1]);
+        $min_damage = ceil($min_atk * (1 - ($def / (0.5 * $def + 0.6 * $min_atk))));
+        $max_damage = ceil($max_atk * (1 - ($def / (0.5 * $def + 0.6 * $max_atk))));
+
+        foreach ($this->damage_var as $var) {
+            $min_damage *= $var[0];
+            $max_damage *= $var[1];
+        }
+        $min_damage = ceil($min_damage);
+        $max_damage = ceil($max_damage);
 
         if ($min_damage < 0) {
             $min_damage = 0;
@@ -39,15 +59,16 @@ class NormalAttack extends BaseAttack {
             $min_damage += $this->damage_add[0];
         }
         if ($max_damage <= 0) {
-            $max_damage = ceil(min([$base_atk, $target_hp]) / 10) + $this->damage_add[1];
+            $max_damage = ceil(min([$this->base_atk, $target_hp]) / 10) + $this->damage_add[1];
         }
         else {
-            $max_damage + $this->damage_add[1];
+            $max_damage += $this->damage_add[1];
         }
 
-        return [$min_damage, $max_damage];
+        $this->damage_range = [$min_damage, $max_damage];
     }
 
+    const ATTACK_TYPE = 'normal_attack';
     const RANDOM_RANGE = [0.89, 1.22];
     const FORMATION_VAR = [
         1 => 1, //'单纵',

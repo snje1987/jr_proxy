@@ -27,14 +27,14 @@ class Skill_170 extends Skill {
     }
 
     /**
-     * @param \App\Model\Attack\BaseAttack $attack
+     * @param \App\Model\DamageCalc\BaseAttack $attack
      */
     public function on_attack($attack, $side) {
         if ($side != 1) {
             return;
         }
         if ($attack->group_name == 'normal_attack' || $attack->group_name == 'normal_attack2') {
-            $attack->damage_range = [(75 + $this->level * 5) / 100, (115 + $this->level * 5) / 100];
+            $attack->add_damage_var([(75 + $this->level * 5) / 100, (115 + $this->level * 5) / 100]);
         }
     }
 

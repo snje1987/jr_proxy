@@ -60,6 +60,10 @@ class RoundGroup {
         return $this->war_counter->do_attack($target, $damage);
     }
 
+    public function check_hp_protect($target, $damage, $min, $max) {
+        return $this->war_counter->check_hp_protect($target, $damage, $min, $max);
+    }
+
     public function __get($name) {
         if (isset($this->{$name})) {
             return $this->{$name};

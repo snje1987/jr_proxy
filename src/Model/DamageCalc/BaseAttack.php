@@ -24,6 +24,10 @@ class BaseAttack {
     protected $to = null;
     //////////////////////
 
+    protected $base_atk = null;
+    protected $damage_range = null;
+    /////////////////////////
+
     protected $ammo_var;
     protected $hp_var;
     protected $formation_var;
@@ -31,7 +35,7 @@ class BaseAttack {
     protected $critical_var;
     protected $skill_var = [1, 1];
     protected $damage_add = [0, 0];
-    protected $damage_var = [1, 1];
+    protected $damage_var = [];
 
     public function __construct($group_name) {
         $this->group_name = $group_name;
@@ -46,6 +50,21 @@ class BaseAttack {
 
     public function __set($name, $value) {
         $this->{$name} = $value;
+    }
+
+    public function add_damage_var($var) {
+        $this->damage_var[] = $var;
+    }
+
+    public function add_damage_add($var, $replace = false) {
+        if ($replace) {
+            $this->damage_add = [0, 0];
+        }
+        if (!is_array($var)) {
+            $var = [$var, $var];
+        }
+        $this->damage_add[0] += $var[0];
+        $this->damage_add[1] += $var[1];
     }
 
     public function calc_range() {

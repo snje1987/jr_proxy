@@ -8,9 +8,10 @@ class WarCounter {
 
     protected $self_ships;
     protected $enemy_ships;
+    protected $type;
 
-    public function __construct() {
-        
+    public function __construct($type) {
+        $this->type = $type;
     }
 
     public function set_self_ships($ships) {
@@ -99,6 +100,42 @@ class WarCounter {
         }
 
         return '<div class="btn-group btn-group-xs">' . $str . '</div>';
+    }
+
+    public function check_hp_protect($target, $damage) {
+        if ($this->type == 'pvp' || $this->type == 'friend') {
+            return false;
+        }
+
+        if ($target[0] != 1) {
+            return false;
+        }
+
+        $ship = $this->get_ship($target);
+        if ($ship === null) {
+            return false;
+        }
+
+        if ($ship['hp_left'] == $ship['hp_max']) {
+            if (($ship['hp_left'] - $damage) * 4 >= $ship['hp_max'] && ($ship['hp_left'] - $damage) * 2 <= $ship['hp_max']) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        elseif ($ship['hp_left'] * 4 > $ship['hp_max']) {
+            if ($damage == ceil($ship['hp_left'] - $ship['hp_max'] / 4)) {
+                return true;
+            }
+            return false;
+        }
+        else {
+            if ($damage == ceil($ship['hp_left'] / 10)) {
+                return true;
+            }
+            return false;
+        }
     }
 
 }

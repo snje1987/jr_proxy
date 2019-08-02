@@ -36,7 +36,7 @@ class Skill_207 extends Skill {
     }
 
     /**
-     * @param \App\Model\Attack\BaseAttack $attack
+     * @param \App\Model\DamageCalc\BaseAttack $attack
      */
     public function on_attack($attack, $side) {
         if ($side != 1) {
@@ -49,12 +49,12 @@ class Skill_207 extends Skill {
 
         $speed = $attack->to->get_battle_prop('speed');
         if ($speed >= 27) {
-            $attack->damage_add = [5 * $this->level, 5 * $this->level];
+            $attack->add_damage_add(5 * $this->level);
         }
     }
 
     /**
-     * @param \App\Model\Attack\BaseAttack $attack
+     * @param \App\Model\DamageCalc\BaseAttack $attack
      */
     public function on_damage($attack, $side) {
         if ($side != 2) {

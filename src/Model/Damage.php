@@ -14,6 +14,7 @@ class Damage {
     protected $critical;
     protected $extra_def;
     protected $helper;
+    protected $true_target;
 
     public function __construct($round_group, $attack) {
         $this->round_group = $round_group;
@@ -42,18 +43,18 @@ class Damage {
 
     public function display($defencer) {
 
-        $true_target = $this->target;
+        $this->true_target = $this->target;
         if (!empty($this->helper)) {
-            $true_target = $this->helper;
+            $this->true_target = $this->helper;
         }
         elseif (!empty($defencer)) {
-            $true_target = $defencer;
+            $this->true_target = $defencer;
         }
 
         $damage_calc = $this->attack->build_calculator();
         if ($damage_calc !== null) {
-            $to = $this->log->get_ship($true_target);
-            $hp_info = $this->round_group->get_ship($true_target);
+            $to = $this->log->get_ship($this->true_target);
+            $hp_info = $this->round_group->get_ship($this->true_target);
 
             $to->set_hp($hp_info['hp_left']);
             $damage_calc->to = $to;
@@ -72,9 +73,9 @@ class Damage {
             $str .= ' 被拦截 ' . $this->round_group->show_ship($defencer);
         }
 
-        $change = $this->round_group->do_attack($true_target, $this->damage);
+        $change = $this->round_group->do_attack($this->true_target, $this->damage);
         if ($change) {
-            $str .= ' <span class="glyphicon glyphicon-arrow-right"></span> ' . $this->round_group->show_ship($true_target);
+            $str .= ' <span class="glyphicon glyphicon-arrow-right"></span> ' . $this->round_group->show_ship($this->true_target);
         }
 
         return $str;
@@ -98,11 +99,11 @@ class Damage {
 
             $range = 'D(' . $min . ', ' . $max . ')  = ';
 
-            if (($this->damage < $min || $this->damage > $max) && $this->damage != 0) {
-                $range = '<span style="color:#990000;font-weight:bold;">' . $range . '</span>';
+            if ($this->check_damage($min, $max)) {
+                $range = '<span style="color:black;font-weight:normal;">' . $range . '</span>';
             }
             else {
-                $range = '<span style="color:black;font-weight:normal;">' . $range . '</span>';
+                $range = '<span style="color:#990000;font-weight:bold;">' . $range . '</span>';
             }
         }
 
@@ -123,6 +124,19 @@ class Damage {
             return $this->{$name};
         }
         return null;
+    }
+
+    protected function check_damage($min, $max) {
+        if (($this->damage >= $min && $this->damage <= $max) || $this->damage == 0) {
+            return true;
+        }
+        if ($this->damage > $max) {
+            return false;
+        }
+        if ($this->round_group->check_hp_protect($this->true_target, $this->damage)) {
+            return true;
+        }
+        return false;
     }
 
 }

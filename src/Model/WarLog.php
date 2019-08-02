@@ -131,7 +131,7 @@ class WarLog {
 
         $this->get_self_fleet();
         $this->get_enemy_fleet();
-        $this->war_counter = new WarCounter();
+        $this->war_counter = new WarCounter($this->raw_data['type']);
         $this->war_counter->set_self_ships($this->self_ships);
         $this->war_counter->set_enemy_ships($this->enemy_ships);
 
