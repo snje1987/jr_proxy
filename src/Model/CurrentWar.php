@@ -74,16 +74,18 @@ class CurrentWar {
             throw new Exception();
         }
 
-        $fleet_id = $data['warReport']['selfFleet']['id'];
+        $ships = $data['warReport']['selfShips'];
+
         $player_info = new PlayerInfo($this->uid);
 
-        $fleet = $player_info->get_fleet($fleet_id);
-        if ($fleet !== null) {
-            $this->fleet = $fleet->get_ships();
+        $ship_list = [];
+        foreach ($ships as $ship) {
+            $ship_obj = $player_info->get_ship($ship['id']);
+            if ($ship_obj !== null) {
+                $ship_list[] = $ship_obj;
+            }
         }
-        else {
-            throw new Exception();
-        }
+        $this->fleet = $ship_list;
 
         $this->war_day = $data;
         return $this;

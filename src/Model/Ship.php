@@ -213,8 +213,7 @@ class Ship implements JsonSerializable {
         foreach ($this->res as $k => $v) {
             $result[$k] = $v;
         }
-
-        $result['range'] = \App\App::RANGE_NAME[$this->battle_props[App::BATTLE_PROP_RANGE]];
+        
         $result['type'] = \App\App::SHIP_TYPE_HASH[$this->type]['title'];
 
         if (isset($this->is_locked)) {
@@ -235,6 +234,7 @@ class Ship implements JsonSerializable {
         foreach ($this->battle_props as $k => $v) {
             $result[$k] = $this->get_battle_prop($k, true);
         }
+        $result['range'] = \App\App::RANGE_NAME[$this->battle_props[App::BATTLE_PROP_RANGE]];
 
         return $result;
     }
@@ -377,7 +377,7 @@ class Ship implements JsonSerializable {
         foreach ($this->equipment as $equip) {
             if ($equip !== null) {
                 foreach (App::SHIP_BATTLE_PROP_NAME as $k => $v) {
-                    if (!isset($equip[$k]) || !isset($this->battle_props[$k]) || $k == App::BATTLE_PROP_SPEED) {
+                    if (!isset($equip[$k]) || !isset($this->battle_props[$k]) || $k == App::BATTLE_PROP_RADAR) {
                         continue;
                     }
 

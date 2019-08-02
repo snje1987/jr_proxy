@@ -118,7 +118,6 @@ class Attack {
         $from = $this->log->get_ship($this->from);
         $hp_info = $this->round_group->get_ship($this->from);
 
-        $from = clone $from;
         $from->set_hp($hp_info['hp_left']);
 
         $damage_calc->from = $from;

@@ -77,6 +77,14 @@ class WarLog {
         return implode('', $htmls);
     }
 
+    public function show_locked_ships() {
+        $str = '';
+        foreach ($this->locked_ships as $ship) {
+            $str .= $this->war_counter->show_ship($ship) . ' ';
+        }
+        return $str;
+    }
+
     public function get_ship($ship_info) {
         if ($ship_info[0] == 1) {
             return $this->self_fleet->get_ship($ship_info[1]);
@@ -189,129 +197,11 @@ class WarLog {
                 isset($this->raw_data['war_result']['extraProgress']) &&
                 isset($this->raw_data['war_result']['extraProgress']['nightAttacks'])) {
 
-            $round_group = new RoundGroup('night_attack', $this);
+            $round_group = new RoundGroup('night_attack', $this, $this->war_counter);
             $round_group->init($this->raw_data['war_result']['extraProgress']['nightAttacks'], $this->war_counter);
 
             $this->round_groups['night_attack'] = $round_group;
         }
-    }
-
-    protected function get_round_group($group_name, $list) {
-        $attacks = [];
-        foreach ($list as $v) {
-            $tmp = $this->add_one_attack($v);
-            $last = count($attacks) - 1;
-            if ($last >= 0 &&
-                    $tmp['from'][0] == $attacks[$last]['from'][0] &&
-                    $tmp['from'][1] == $attacks[$last]['from'][1]) {
-                foreach ($tmp['attack'] as $v) {
-                    $attacks[$last]['attack'][] = $v;
-                }
-            }
-            else {
-                $attacks[] = $tmp;
-            }
-        }
-
-        if ($merge_all) {
-            $ori_attacks = $attacks;
-            $attacks = [];
-            foreach ($ori_attacks as $v) {
-                $index = $v['from'][0] . '_' . $v['from'][1];
-                if (!isset($attacks[$index])) {
-                    $attacks[$index] = $v;
-                }
-                else {
-                    foreach ($v['attack'] as $v) {
-                        $attacks[$index]['attack'][] = $v;
-                    }
-                }
-            }
-        }
-
-        if (empty($attacks)) {
-            return [];
-        }
-
-        return $attacks;
-    }
-
-    protected function add_one_attack($info) {
-        $from = $info['fromIndex'];
-
-        if ($info['attackSide'] == 1) {
-            $self_ship = 1;
-            $enemy_ship = 2;
-        }
-        else {
-            $self_ship = 2;
-            $enemy_ship = 1;
-        }
-
-        $attack = [
-            'from' => [$self_ship, $from],
-            'type' => $info['attackType'],
-            'attack' => [],
-        ];
-
-        if ($info['skillId'] != 0) {
-            $skill = $this->game_info->get_skill_card($info['skillId']);
-            if ($skill !== null) {
-                $attack['skill'] = $skill;
-            }
-        }
-
-        foreach ($info['targetIndex'] as $k => $target) {
-            $raw_damage = $info['damages'][$k];
-
-            $amount = $raw_damage['amount'];
-            $extra = [];
-            if ($raw_damage['extraDef'] != 0) {
-                $amount = $amount - $raw_damage['extraDef'];
-                $extra[] = '-' . $raw_damage['extraDef'];
-            }
-
-            if (!empty($extra)) {
-                $extra_str = '(' . implode('', $extra) . ')';
-            }
-            else {
-                $extra_str = '';
-            }
-
-            $defencer = [];
-            $helper = [];
-            if (!empty($info['tmdDef'])) {
-                $defencer_index = $info['tmdDef'][0];
-                if ($defencer_index > 0) {
-                    $defencer = [$enemy_ship, $defencer_index];
-                }
-            }
-            elseif ($raw_damage['extraDefHelper'] >= 0 && $raw_damage['defType'] == 0) {
-                $helper_index = $raw_damage['extraDefHelper'];
-                $helper = [$enemy_ship, $helper_index];
-            }
-
-            $damage = [
-                'damage' => $amount,
-                'extra' => $extra_str,
-                'critical' => $raw_damage['isCritical'],
-                'amount' => $info['planeAmount'],
-                'drop' => $info['dropAmount'],
-                'plane_type' => $info['planeType'],
-                'defencer' => $defencer,
-                'helper' => $helper,
-            ];
-            $damage['target'] = [$enemy_ship, $target];
-
-            $true_target = $damage['target'];
-            if (!empty($damage['helper'])) {
-                $true_target = $damage['helper'];
-            }
-
-            $attack['attack'][] = $damage;
-        }
-
-        return $attack;
     }
 
     protected function get_buff_info($list, $type) {

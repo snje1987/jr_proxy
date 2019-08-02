@@ -32,9 +32,7 @@ use App\Controler\Warlog ?>
         <?php if (!empty($log->locked_ships)) { ?>
             <div style="margin-bottom:5px;">
                 <p>被锁定船只</p>
-                <?php foreach ($log->locked_ships as $ship) { ?>
-                    <?= $log->show_ship($ship) ?>
-                <?php } ?>
+                <?= $log->show_locked_ships() ?>
             </div>
         <?php } ?>
     </div>
@@ -44,6 +42,12 @@ use App\Controler\Warlog ?>
         <div class="panel panel-primary">
             <div class="panel-heading"><?= $name ?></div>
             <div class="panel-body">
+
+                <?php if ($key == 'open_air_attack' && !empty($log->air_control)) { ?>
+                    <div style="margin-bottom:5px;">
+                        <span class="btn btn-primary" title="<?= $log->air_control['desc'] ?>"><?= $log->air_control['title'] ?></span>
+                    </div>
+                <?php } ?>
                 <?= $log->round_groups[$key]->display() ?>
             </div>
         </div>
