@@ -33,6 +33,7 @@ class BaseAttack {
     protected $formation_var;
     protected $war_type_var;
     protected $critical_var;
+    protected $ant_def_var;
     protected $skill_var = [1, 1];
     protected $damage_add = [0, 0];
     protected $damage_var = [];

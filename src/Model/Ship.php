@@ -213,7 +213,7 @@ class Ship implements JsonSerializable {
         foreach ($this->res as $k => $v) {
             $result[$k] = $v;
         }
-        
+
         $result['type'] = \App\App::SHIP_TYPE_HASH[$this->type]['title'];
 
         if (isset($this->is_locked)) {
@@ -292,6 +292,20 @@ class Ship implements JsonSerializable {
     }
 
     public function on_attack($attack, $side) {
+
+        if ($side == 1) {
+            foreach ($this->equipment as $equip) {
+                if ($equip !== null) {
+                    if ($equip['id'] == '10013021') {//91式穿甲弹 0.8
+                        $attack->ant_def_var = 0.8;
+                    }
+                    elseif ($equip['id'] == '10036421') {//91式穿甲弹 0.85
+                        $attack->ant_def_var = 0.85;
+                    }
+                }
+            }
+        }
+
         foreach ($this->attack_hook as $callable) {
             call_user_func($callable, $attack, $side);
         }

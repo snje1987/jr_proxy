@@ -62,6 +62,7 @@ class App {
     const SHIP_TYPE_PS = 22;
     const SHIP_TYPE_ASDG = 23;
     const SHIP_TYPE_AADG = 24;
+    const SHIP_TYPE_BG = 26;
     const SHIP_TYPE_FLAGSHIP = 99;
     ///////////////////////
     const SHIP_TYPE_HASH = [
@@ -89,7 +90,7 @@ class App {
         self::SHIP_TYPE_PS => ['title' => '海盗', 'group' => 'big',],
         self::SHIP_TYPE_ASDG => ['title' => '导驱', 'group' => 'big',],
         self::SHIP_TYPE_AADG => ['title' => '防驱', 'group' => 'big',],
-        26 => ['title' => '导战', 'group' => 'big',],
+        self::SHIP_TYPE_BG => ['title' => '导战', 'group' => 'big',],
         98 => ['title' => '未知',],
         self::SHIP_TYPE_FLAGSHIP => ['title' => '旗舰', 'group' => 'big',],
         100 => ['title' => '其它',],

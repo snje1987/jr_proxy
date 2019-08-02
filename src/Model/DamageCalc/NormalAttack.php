@@ -13,6 +13,7 @@ class NormalAttack extends BaseAttack {
 
     public function calc_range() {
 
+        $this->ant_def_var = 0.6;
         $this->calc_common_var();
 
         $this->from->on_attack($this, 1);
@@ -42,8 +43,8 @@ class NormalAttack extends BaseAttack {
         $def = $this->to->get_battle_prop(App::BATTLE_PROP_DEF);
         $target_hp = $this->to->res['hp'];
 
-        $min_damage = ceil($min_atk * (1 - ($def / (0.5 * $def + 0.6 * $min_atk))));
-        $max_damage = ceil($max_atk * (1 - ($def / (0.5 * $def + 0.6 * $max_atk))));
+        $min_damage = $min_atk * (1 - ($def / (0.5 * $def + $this->ant_def_var * $min_atk)));
+        $max_damage = $max_atk * (1 - ($def / (0.5 * $def + $this->ant_def_var * $max_atk)));
 
         foreach ($this->damage_var as $var) {
             $min_damage *= $var[0];
@@ -52,16 +53,18 @@ class NormalAttack extends BaseAttack {
         $min_damage = ceil($min_damage);
         $max_damage = ceil($max_damage);
 
+        $max_damage2 = ceil(min([$this->base_atk, $target_hp]) / 10);
+
+        $max_damage = $max_damage < $max_damage2 ? $max_damage2 : $max_damage;
+
         if ($min_damage < 0) {
             $min_damage = 0;
         }
         else {
             $min_damage += $this->damage_add[0];
         }
-        if ($max_damage <= 0) {
-            $max_damage = ceil(min([$this->base_atk, $target_hp]) / 10) + $this->damage_add[1];
-        }
-        else {
+
+        if ($max_damage > 0) {
             $max_damage += $this->damage_add[1];
         }
 
